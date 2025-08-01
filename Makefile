@@ -6,7 +6,7 @@ CFLAGS = -std=c11 -O2 -g3 -Wall -Wextra --target=riscv32-unknown-elf \
 LDFLAGS = -Wl,-Tkernel.ld -Wl,-Map=kernel.map
 
 # 檔案列表
-SRCS = kernel.c lib/mm/mm.c lib/sbi/sbi.c
+SRCS = kernel/kernel.c lib/mm/mm.c lib/sbi/sbi.c
 OBJS = $(SRCS:.c=.o)
 TARGET = kernel.elf
 
