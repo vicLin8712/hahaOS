@@ -7,3 +7,5 @@ struct sbiret {
 
 struct sbiret sbi_call(long arg0, long arg1, long arg2, long arg3,
                        long arg4, long arg5, long fid, long eid);
+
+struct sbiret sbi_get_spec_version(void);

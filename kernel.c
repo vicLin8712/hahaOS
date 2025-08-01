@@ -1,6 +1,6 @@
 #include "kernel.h"
 #include "sbi/sbi.h"
-#include "mm.h"
+#include "mm/mm.h"
 #include "sections.h"
 
 
@@ -16,6 +16,9 @@ void kernel_main(void) {
     for (int i = 0; s[i] != '\0'; i++) {
         putchar(s[i]);
     }
+	
+    struct sbiret ver = sbi_get_spec_version();
+	putchar(ver.value);
 
     for (;;) {
         __asm__ __volatile__("wfi");
