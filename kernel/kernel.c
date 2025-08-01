@@ -17,7 +17,11 @@ void kernel_main(void) {
     }
 	
     struct sbiret ver = sbi_get_spec_version();
-	putchar(ver.value);
+	int major = (ver.value >> 24) & 0x7F;
+    int minor = ver.value & 0x00FFFFFF;
+    putchar('0' + major);
+    putchar('.');
+    putchar('0' + minor %10);
 
     for (;;) {
         __asm__ __volatile__("wfi");
