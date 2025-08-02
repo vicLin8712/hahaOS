@@ -15,6 +15,12 @@ void kernel_main(void) {
     for (int i = 0; s[i] != '\0'; i++) {
         putchar(s[i]);
     }
+
+    char buffer[15];
+    char *test = buffer;
+    memcpy(test, s, 13);
+    print("test result\n");
+    print (test);
 	
 
     for (;;) {
