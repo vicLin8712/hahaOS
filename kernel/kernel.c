@@ -10,18 +10,11 @@
 void kernel_main(void) {
     
     memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
-	const char *s = "\n\nHello World!\n";
 
-    for (int i = 0; s[i] != '\0'; i++) {
-        putchar(s[i]);
-    }
-
-    char buffer[15];
-    char *test = buffer;
-    memcpy(test, s, 13);
-    print("test result\n");
-    print (test);
-	
+    char *s1 = "HELLO";
+    char *s2 = "HELLO";
+    int cmp = memcmp(s1,s2);
+    print ("cmp %d", cmp);
 
     for (;;) {
         __asm__ __volatile__("wfi");

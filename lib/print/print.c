@@ -34,6 +34,10 @@ void print(const char *fmt, ...){
 			    // Decimal Type
 				case 'd':{
 				    int value = va_arg(vargs, int);
+					if (value == 0){
+						putchar('0');
+						break;
+					}
 					if (value < 0){
 						putchar ('-');
 					    value = - value;
