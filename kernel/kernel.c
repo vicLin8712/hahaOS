@@ -1,20 +1,19 @@
 #include "kernel.h"
-#include "sbi/sbi.h"
 #include "mm/mm.h"
 #include "print/print.h"
+#include "sbi/sbi.h"
 #include "sections.h"
 
 
 
-
-void kernel_main(void) {
-    
+void kernel_main(void)
+{
     memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
 
     char *s1 = "HELLO";
     char *s2 = "HELLO";
-    int cmp = memcmp(s1,s2);
-    print ("cmp %d", cmp);
+    int cmp = memcmp(s1, s2);
+    print("cmp %d", cmp);
 
     for (;;) {
         __asm__ __volatile__("wfi");
@@ -22,13 +21,13 @@ void kernel_main(void) {
 }
 
 
-__attribute__((section(".text.boot")))
-__attribute__((naked))
-void boot(void) {
+__attribute__((section(".text.boot"))) __attribute__((naked)) void boot(void)
+{
     __asm__ __volatile__(
-        "mv sp, %[stack_top]\n" // Set the stack pointer
-        "j kernel_main\n"       // Jump to the kernel main function
+        "mv sp, %[stack_top]\n"  // Set the stack pointer
+        "j kernel_main\n"        // Jump to the kernel main function
         :
-        : [stack_top] "r" (__stack_top) // Pass the stack top address as %[stack_top]
+        : [stack_top] "r"(
+            __stack_top)  // Pass the stack top address as %[stack_top]
     );
 }
