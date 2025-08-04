@@ -1,5 +1,8 @@
 #include "mm.h"
 
+extern __free_ram[], __free_ram_end;
+#define PAGE_SIZE = 4096 /* 4KB per page */
+
 void *memset(void *buf, char c, size_t n)
 {
     uint8_t *p = (uint8_t *) buf;
@@ -38,4 +41,11 @@ void *strcpy(char *dst, const char *src )
         src++;
     }
     return dst;
+}
+
+void *page_allocate(size_t page)
+{
+    static uint32_t begin_addr = __free_ram;
+    end_addr = begin_addr + page * PAGE_SIZE;
+    memset(begin_addr, '0', page * PAGE_SIZE);
 }
