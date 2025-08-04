@@ -11,9 +11,10 @@ void kernel_main(void)
     memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
 
     char *s1 = "HELLO";
-    char *s2 = "HELLO";
-    int cmp = memcmp(s1, s2);
-    print("cmp %d", cmp);
+    char buf[10];
+    char *s2 = buf;
+    strcpy(s2, s1);
+    print("copy str is %s", s2);
 
     for (;;) {
         __asm__ __volatile__("wfi");
