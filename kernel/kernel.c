@@ -14,7 +14,6 @@ void kernel_main(void)
     char buf[10];
     char *s2 = buf;
     strcpy(s2, s1);
-    print("copy str is %s", s2);
 
     for (;;) {
         __asm__ __volatile__("wfi");

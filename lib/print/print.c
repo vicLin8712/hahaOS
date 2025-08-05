@@ -7,7 +7,7 @@ void putchar(char ch)
     sbi_call(ch, 0, 0, 0, 0, 0, 0, 1 /* Console Putchar */);
 }
 
-void print(const char *fmt, ...)
+void printf(const char *fmt, ...)
 {
     va_list vargs;
     va_start(vargs, fmt);
@@ -55,6 +55,15 @@ void print(const char *fmt, ...)
                     putchar(buf[i]);
                 break;
             }
+            case 'x':{
+                unsigned value = va_arg(vargs, unsigned);
+                printf("0x");
+                for (int i = 7; i>=0; i--){
+                    unsigned nibble = (value >> (i*4)) & 0xF;
+                    putchar("0123456789ABCDEF"[nibble]);
+                }
+            }
+
             }
 
         } else {

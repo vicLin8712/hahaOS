@@ -28,6 +28,6 @@ SECTIONS {
 
     . = ALIGN(4096);
     __free_ram = .;
-    . += 64 * 1024 * 1024 /* 64 MB memory */
+    . += 64 * 1024 * 1024; /* 64 MB memory */
     __free_ram_end = .;
 }

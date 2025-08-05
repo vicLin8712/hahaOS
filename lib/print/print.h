@@ -2,4 +2,4 @@
 
 void putchar(char ch);
 
-void print(const char *fmt, ...);
+void printf(const char *fmt, ...);

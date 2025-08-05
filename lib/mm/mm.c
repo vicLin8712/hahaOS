@@ -1,7 +1,7 @@
 #include "mm.h"
+#include "sections.h"
 
-extern __free_ram[], __free_ram_end;
-#define PAGE_SIZE = 4096 /* 4KB per page */
+#define PAGE_SIZE  4096; /* 4KB per page */
 
 void *memset(void *buf, char c, size_t n)
 {
@@ -45,7 +45,4 @@ void *strcpy(char *dst, const char *src )
 
 void *page_allocate(size_t page)
 {
-    static uint32_t begin_addr = __free_ram;
-    end_addr = begin_addr + page * PAGE_SIZE;
-    memset(begin_addr, '0', page * PAGE_SIZE);
 }
