@@ -1,4 +1,5 @@
-#include "sbi/sbi.h"
+#include "include/libc.h"
+#include "include/sbi.h"
 
 struct sbiret sbi_call(long arg0,
                        long arg1,

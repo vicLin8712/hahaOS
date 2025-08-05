@@ -2,11 +2,11 @@
 CC = clang
 CFLAGS = -std=c11 -O2 -g3 -Wall -Wextra --target=riscv32-unknown-elf \
          -fno-stack-protector -ffreestanding -nostdlib \
-		 -Ilib -I.
-LDFLAGS = -Wl,-Tkernel.ld -Wl,-Map=kernel.map
+		 -Ilib -I. -Iinclude 
+LDFLAGS = -Wl,-Tarch/kernel.ld -Wl,-Map=kernel.map
 
 # 檔案列表
-SRCS = kernel/kernel.c lib/mm/mm.c lib/sbi/sbi.c lib/print/print.c
+SRCS = kernel/kernel.c lib/mm.c lib/stdio.c lib/sbi.c
 OBJS = $(SRCS:.c=.o)
 TARGET = kernel.elf
 

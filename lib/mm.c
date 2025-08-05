@@ -1,6 +1,5 @@
-#include "mm.h"
-#include "sections.h"
-#include "print/stdio.h"
+#include "include/libc.h"
+#include "include/sections.h"
 
 #define PAGE_SIZE  4096 /* 4KB per page */
 

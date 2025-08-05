@@ -1,6 +1,6 @@
-#include "print/stdio.h"
-#include "sbi/sbi.h"
-#include "type.h"
+#include "include/libc.h"
+#include "include/type.h"
+#include "include/sbi.h"
 
 void putchar(char ch)
 {
