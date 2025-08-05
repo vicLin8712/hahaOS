@@ -1,35 +1,30 @@
-# 編譯器與參數
 CC = clang
 CFLAGS = -std=c11 -O2 -g3 -Wall -Wextra --target=riscv32-unknown-elf \
          -fno-stack-protector -ffreestanding -nostdlib \
-		 -Ilib -I. -Iinclude 
-LDFLAGS = -Wl,-Tarch/kernel.ld -Wl,-Map=kernel.map
+         -Ilib -I. -Iinclude -Ikernel
+LDFLAGS = -Wl,-Tarch/kernel.ld -Wl,-Map=build/kernel.map
 
-# 檔案列表
-SRCS = kernel/kernel.c lib/mm.c lib/stdio.c lib/sbi.c
-OBJS = $(SRCS:.c=.o)
-TARGET = kernel.elf
+BUILD_DIR = build
 
-# QEMU SETTING
+SRCS = kernel/kernel.c kernel/task.c lib/mm.c lib/stdio.c lib/sbi.c
+OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
+
+TARGET = $(BUILD_DIR)/kernel.elf
+
 QEMU = qemu-system-riscv32
 QEMU_FLAGS = -machine virt -bios default -nographic -serial mon:stdio --no-reboot
 
-
-# 預設目標
 all: $(TARGET)
 
-# 編譯 elf
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-# 每個 .o 的規則
-%.o: %.c
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# 執行 QEMU
 run: $(TARGET)
 	$(QEMU) $(QEMU_FLAGS) -kernel $(TARGET)
 
-# 清除目標
 clean:
-	rm -f $(OBJS) $(TARGET) kernel.map
+	rm -rf $(BUILD_DIR)
