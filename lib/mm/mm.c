@@ -1,13 +1,16 @@
 #include "mm.h"
 #include "sections.h"
+#include "print/stdio.h"
 
-#define PAGE_SIZE  4096; /* 4KB per page */
+#define PAGE_SIZE  4096 /* 4KB per page */
 
 void *memset(void *buf, char c, size_t n)
 {
     uint8_t *p = (uint8_t *) buf;
-    while (n--)
+    while (n--){
         *p++ = c;
+        printf("memory address %x is reset\n", p);
+    }
     return buf;
 }
 
@@ -45,4 +48,7 @@ void *strcpy(char *dst, const char *src )
 
 void *page_allocate(size_t page)
 {
+    char *begin = (char *) __free_ram;
+    char *end = begin + page * PAGE_SIZE;
+    memset(begin, '0', page * PAGE_SIZE);
 }
