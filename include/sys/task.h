@@ -16,5 +16,10 @@ struct process{
     uint8_t stack[8192];
 };
 
+extern struct process procs[PROCS_MAX];
 void switch_context (vaddr_t *prev_sp, vaddr_t* next_sp);
 struct process *create_process(uint32_t pc);
+
+void task_A();
+void task_B();
+struct process *scheduler();
