@@ -2,33 +2,7 @@
 #include "include/type.h"
 #include "include/libc.h"
 
-void switch_context (vaddr_t *prev_sp, vaddr_t* next_sp){
-    if(!prev_sp){
-        printf("Init task\n\n\n");
-        printf("ra is %x \n\n\n", next_sp);
-        __asm__ __volatile__(
-        "lw sp, (a1)\n"         // Switch stack pointer (sp) here
-
-        // Restore callee-saved registers from the next process's stack.
-        "lw ra,  0  * 4(sp)\n"  // Restore callee-saved registers only
-        "lw s0,  1  * 4(sp)\n"
-        "lw s1,  2  * 4(sp)\n"
-        "lw s2,  3  * 4(sp)\n"
-        "lw s3,  4  * 4(sp)\n"
-        "lw s4,  5  * 4(sp)\n"
-        "lw s5,  6  * 4(sp)\n"
-        "lw s6,  7  * 4(sp)\n"
-        "lw s7,  8  * 4(sp)\n"
-        "lw s8,  9  * 4(sp)\n"
-        "lw s9,  10 * 4(sp)\n"
-        "lw s10, 11 * 4(sp)\n"
-        "lw s11, 12 * 4(sp)\n"
-        "addi sp, sp, 13 * 4\n"  // We've popped 13 4-byte registers from the stack
-        "ret\n"
-        );
-
-        
-    }
+__attribute__((naked)) void switch_context (vaddr_t *prev_sp, vaddr_t* next_sp){
     /* Assembly code */
     __asm__ __volatile__(
         "addi sp, sp, -13 * 4\n"
@@ -69,6 +43,27 @@ void switch_context (vaddr_t *prev_sp, vaddr_t* next_sp){
     );
 }
 
+__attribute__((naked)) void init_context(vaddr_t *init_sp){
+    __asm__ __volatile__(
+        "lw sp, (a0)\n"
+        "lw ra,  0  * 4(sp)\n"  // Restore callee-saved registers only
+        "lw s0,  1  * 4(sp)\n"
+        "lw s1,  2  * 4(sp)\n"
+        "lw s2,  3  * 4(sp)\n"
+        "lw s3,  4  * 4(sp)\n"
+        "lw s4,  5  * 4(sp)\n"
+        "lw s5,  6  * 4(sp)\n"
+        "lw s6,  7  * 4(sp)\n"
+        "lw s7,  8  * 4(sp)\n"
+        "lw s8,  9  * 4(sp)\n"
+        "lw s9,  10 * 4(sp)\n"
+        "lw s10, 11 * 4(sp)\n"
+        "lw s11, 12 * 4(sp)\n"
+        "addi sp, sp, 13 * 4\n"
+        "ret\n"
+    );
+}
+
 
 struct process procs[PROCS_MAX]; // All process control structures.
 struct process *create_process(uint32_t pc) {
@@ -105,17 +100,12 @@ struct process *create_process(uint32_t pc) {
     proc->state = PROC_RUNNABLE;
     proc->sp = (uint32_t) sp;
     printf("PROCESS PID %d created\n", proc->pid);
-    
+    printf("PROCESS STATE %d\n", proc->state);
     printf("PROCESS sp is %x \n", proc->sp);
     return proc;
 }
 
-void task_A(){
-    printf("task_A executed");
-}
-void task_B(){
-    printf("task_B executed");
-}
+
 
 struct process *scheduler(){
     for (int i = 0; i<PROCS_MAX; i++)
@@ -123,9 +113,24 @@ struct process *scheduler(){
         printf("\n\nindex %d\n\n", i);
         if (procs[i].state == PROC_RUNNABLE)
         {
-            printf("PID %d found",procs[i].pid);
+            printf("PID %d found\n",procs[i].pid);
+            procs[i].state = PROC_UNUSED;
+            printf("state unused\n");
             return &procs[i];
         }
     }
+    printf("No task");
+    while(1);
     return NULL;
+}
+void schedule(){
+    struct process *init = scheduler();
+    init_context(&init->sp);
+    struct process *old_task = init;
+    struct process *new_task;
+    while (1){
+        new_task = scheduler();
+        printf("new_task is %x, old_task is %x!\n", new_task, old_task);
+        switch_context(&old_task->sp, &new_task->sp);
+    }
 }
