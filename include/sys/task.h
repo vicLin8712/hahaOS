@@ -37,4 +37,4 @@ extern struct task tasks[PROCS_MAX];
 /* Scheduler */
 int32_t create_task(uint32_t pc);
 /* Find next available task*/
-uint32_t scheduler(void);
+uint8_t sched_select_next_task(void);

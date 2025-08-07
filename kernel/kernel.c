@@ -19,7 +19,7 @@ void kernel_main(void) {
     create_task((uint32_t) &task_B); 
     
     
-
+    sched_select_next_task();
     while (1) {
     };
     
