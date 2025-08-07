@@ -5,21 +5,21 @@
 
 void task_A(){
     printf("task_A executed");
-    return;
+    yield();
 }
 void task_B(){
     printf("task_B executed");
-    while(1);
+    while (1);
 }
 
 void kernel_main(void) {
     memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
 
     create_task((uint32_t) &task_A); 
-    create_task((uint32_t) &task_B); 
-    
+    create_task((uint32_t)&task_B);
     
     sched_select_next_task();
+    sched();
     while (1) {
     };
     

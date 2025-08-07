@@ -42,8 +42,22 @@ uint8_t sched_select_next_task(void)
     {
         if (tasks[i].state == TASK_READY)
         {
-            printf("FIND READY TASK INDEX %d\n", i);
+            kcb->cur_task = &tasks[i];
+            return 1;
         }
         
     }
+    printf("NO TASK FOUND");
+    while (1);
+}
+
+void sched(void) {
+    longjmp(kcb->cur_task->context, 1);
+}
+
+void yield(void) {
+    setjmp(kcb->cur_task->context);
+    kcb->cur_task->state = TASK_STOPPED;
+    sched_select_next_task();
+    sched();
 }

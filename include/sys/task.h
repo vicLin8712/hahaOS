@@ -23,8 +23,8 @@ struct task {
 };
 
 typedef struct{
-    uint32_t *tasks; /* Data structure store all tasks */
-    uint32_t *cur_task; /* Current running task */
+    struct task *tasks; /* Data structure store all tasks */
+    struct task *cur_task; /* Current running task */
     uint8_t pid_assign; /* Check pid and assign to new task */
 
 
@@ -36,5 +36,12 @@ extern struct task tasks[PROCS_MAX];
 
 /* Scheduler */
 int32_t create_task(uint32_t pc);
+
 /* Find next available task*/
 uint8_t sched_select_next_task(void);
+
+/* Schedule process */
+void sched(void);
+
+/* Yield to sched*/
+void yield(void);
