@@ -7,9 +7,9 @@
 
 typedef unsigned char uint8_t;
 typedef unsigned int uint32_t;
-typedef uint32_t size_t;
+typedef int int32_t;
 
-typedef uint32_t vaddr_t;
+typedef uint32_t size_t;
 
 #define true  1
 #define false 0

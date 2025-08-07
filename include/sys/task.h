@@ -1,27 +1,40 @@
 #pragma once
-#include "include/type.h"
+#include "type.h"
+#include "hal.h"
 
-/* Max number of process */
+/* Max number of task */
 #define PROCS_MAX 8
 
-/* Unused process control structure */
-#define PROC_UNUSED 0
-/* Runnable process */
-#define PROC_RUNNABLE 1
+/* End task (can put new task)*/
+#define NO_TASK 0
+/* Ready to run task*/
+#define TASK_READY 1
+/* Runnable task */
+#define TASK_RUNNING 2
+/* Stop task (can be resumed)*/
+#define TASK_STOPPED 3
 
-struct process{
-    int pid;
-    int state;
-    vaddr_t sp;
+struct task {
+    uint32_t entry; /* new function entry address */
+    int32_t pid;
+    int32_t state;
+    jmp_buf context;
     uint8_t stack[8192];
 };
 
-extern struct process procs[PROCS_MAX];
-void switch_context (vaddr_t *prev_sp, vaddr_t* next_sp);
-void init_context (vaddr_t *init_sp);
-struct process *create_process(uint32_t pc);
+typedef struct{
+    uint32_t *tasks; /* Data structure store all tasks */
+    uint32_t *cur_task; /* Current running task */
+    uint8_t pid_assign; /* Check pid and assign to new task */
 
-void task_A();
-void task_B();
-struct process *scheduler();
-void schedule();
+
+}kcb_t;
+
+extern kcb_t *kcb;
+
+extern struct task tasks[PROCS_MAX];
+
+/* Scheduler */
+int32_t create_task(uint32_t pc);
+/* Find next available task*/
+uint32_t scheduler(void);

@@ -1,12 +1,12 @@
 CC = clang
 CFLAGS = -std=c11 -O0 -g3 -Wall -Wextra --target=riscv32-unknown-elf \
          -fno-stack-protector -ffreestanding -nostdlib \
-         -Ilib -I. -Iinclude -Ikernel
+         -Ilib -I. -Iinclude -Ikernel -Iarch
 LDFLAGS = -Wl,-Tarch/kernel.ld -Wl,-Map=build/kernel.map
 
 BUILD_DIR = build
 
-SRCS = kernel/kernel.c kernel/task.c lib/mm.c lib/stdio.c lib/sbi.c 
+SRCS = kernel/kernel.c kernel/task.c lib/mm.c lib/stdio.c lib/sbi.c arch/hal.c
 OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
 TARGET = $(BUILD_DIR)/kernel.elf
