@@ -1,5 +1,5 @@
 #include "include/libc.h"
-#include "include/type.h"
+#include "type.h"
 #include "include/sbi.h"
 
 void putchar(char ch)

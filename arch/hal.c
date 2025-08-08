@@ -41,7 +41,7 @@ int32_t setjmp(jmp_buf env) {
     return 0;
 }
 
-int32_t longjmp(jmp_buf env, int32_t val)
+__attribute__((noreturn)) int32_t longjmp(jmp_buf env, int32_t val)
 {
     if (val == 0)
         val = 1;

@@ -4,23 +4,38 @@
 #include "include/sections.h"
 
 void task_A(){
-    printf("task_A executed");
+    printf("task_A executed\n");
     yield();
 }
 void task_B(){
-    printf("task_B executed");
-    while (1);
+    printf("task_B executed\n");
+    yield();
 }
+
+void task_C(){
+    printf("task_C executed\n");
+    yield();
+}
+
+void task_D(){
+    printf("task_D executed\n");
+    task_A();
+}
+
+
 
 void kernel_main(void) {
     memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
 
-    create_task((uint32_t) &task_A); 
+    create_task((uint32_t)&task_A);
     create_task((uint32_t)&task_B);
-    
+    create_task((uint32_t)&task_C);
+    create_task((uint32_t)&task_D);
+
     sched_select_next_task();
-    sched();
+
     while (1) {
+        sched();
     };
     
 }
