@@ -1,7 +1,6 @@
 #include "include/libc.h"
 #include "include/sections.h"
 
-#define PAGE_SIZE  4096 /* 4KB per page */
 
 void *memset(void *buf, char c, size_t n)
 {
@@ -44,9 +43,3 @@ void *strcpy(char *dst, const char *src )
     return dst;
 }
 
-void *page_allocate(size_t page)
-{
-    char *begin = (char *) __free_ram;
-    char *end = begin + page * PAGE_SIZE;
-    memset(begin, '0', page * PAGE_SIZE);
-}
