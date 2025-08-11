@@ -1,5 +1,14 @@
 #pragma once
 #include "type.h"
+
+extern char __bss[];
+extern char __bss_end[];
+extern char __stack_top[];
+
+extern char __free_ram[];
+extern char __free_ram_end[];
+
+
 /* Define buffer for task switching.
  * Memory layouts (14 x 32-bit words)
  * [0-11]: s0-s11 (callee-saved registers)
