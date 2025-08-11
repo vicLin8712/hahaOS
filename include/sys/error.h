@@ -14,7 +14,9 @@ enum {
     ERR_STACK_ALLOC,       /* Task stack allocation fail */
 
     /* Memory Protection Error*/
-    ERR_STACK_CHECK       /* Stack overflow or corruption detected */
+    ERR_STACK_CHECK,       /* Stack overflow or corruption detected */
+
+    ERR_UNKNOWN            /* Unknow error, the last error case */
 
 };
 

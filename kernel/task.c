@@ -1,4 +1,5 @@
 #include "include/sys/task.h"
+#include "include/sys/error.h"
 #include "include/libc.h"
 #include "type.h"
 
@@ -50,8 +51,6 @@ uint8_t sched_select_next_task(void)
             return 1;
         }
     }
-    while (1)
-        ;
 }
 
 void sched(void)
@@ -65,4 +64,19 @@ void yield(void)
     setjmp(kcb->cur_task->context);
     sched_select_next_task();
     sched();
+}
+
+/* Kernel panic */
+void panic(int32_t code) {
+    const char *msg = "unknown error";
+    for (size_t i = 0; perror[i].desc != ERR_UNKNOWN; ++i)
+    {
+        if (perror[i].code == code)
+        {
+            msg = perror[i].desc;
+            break;
+        }   
+    }
+    printf("\n *** KERNEL PANIC (%d) – %s\n", (int)code, msg);
+    hal_panic();
 }

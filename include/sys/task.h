@@ -33,15 +33,14 @@ typedef struct {
 extern kcb_t *kcb;
 
 extern struct task tasks[PROCS_MAX];
-
 /* Scheduler */
 int32_t create_task(uint32_t pc);
-
 /* Find next available task*/
 uint8_t sched_select_next_task(void);
-
 /* Schedule process */
 void sched(void);
-
 /* Yield to sched*/
 void yield(void);
+
+/* Handle error and print message */
+void panic(int32_t code);
