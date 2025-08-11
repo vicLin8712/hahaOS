@@ -15,3 +15,5 @@ static const struct err_code desc[] = {
     {ERR_STACK_CHECK, "Stack malloc overflow or corruption"},       /* Stack overflow or corruption detected */
     {ERR_UNKNOWN, "Unknow error happened! "},
 };
+
+const struct err_code *const perror = desc;

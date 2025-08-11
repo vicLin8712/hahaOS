@@ -1,5 +1,5 @@
-#include "include/sys/task.h"
-#include "include/sys/error.h"
+#include "sys/task.h"
+#include "sys/error.h"
 #include "include/libc.h"
 #include "type.h"
 
@@ -51,6 +51,7 @@ uint8_t sched_select_next_task(void)
             return 1;
         }
     }
+    panic(ERR_NO_TASK);
 }
 
 void sched(void)
