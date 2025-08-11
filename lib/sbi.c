@@ -1,5 +1,5 @@
-#include "include/libc.h"
 #include "include/sbi.h"
+#include "include/libc.h"
 
 struct sbiret sbi_call(long arg0,
                        long arg1,
@@ -31,3 +31,10 @@ struct sbiret sbi_get_spec_version(void)
 {
     return sbi_call(0, 0, 0, 0, 0, 0, 0, 0x10);
 }
+
+/* 4.5. Function: Get machine vendor ID (FID #4) */
+struct  sbiret sbi_get_mvendorid(void)
+{
+    return sbi_call(0, 0, 0, 0, 0, 0, 4, 0x10);
+};
+

@@ -12,6 +12,6 @@ typedef uint32_t uintptr_t;
 
 typedef uint32_t size_t;
 
-#define true  1
+#define true 1
 #define false 0
-#define NULL  ((void *) 0)
+#define NULL ((void *) 0)

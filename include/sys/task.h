@@ -1,6 +1,6 @@
 #pragma once
-#include "type.h"
 #include "hal.h"
+#include "type.h"
 
 /* Max number of task */
 #define PROCS_MAX 8
@@ -22,13 +22,13 @@ struct task {
     uint8_t stack[8192];
 };
 
-typedef struct{
-    struct task *tasks; /* Data structure store all tasks */
+typedef struct {
+    struct task *tasks;    /* Data structure store all tasks */
     struct task *cur_task; /* Current running task */
-    uint8_t pid_assign; /* Check pid and assign to new task */
+    uint8_t pid_assign;    /* Check pid and assign to new task */
 
 
-}kcb_t;
+} kcb_t;
 
 extern kcb_t *kcb;
 

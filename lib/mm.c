@@ -5,7 +5,7 @@
 void *memset(void *buf, char c, size_t n)
 {
     uint8_t *p = (uint8_t *) buf;
-    while (n--){
+    while (n--) {
         *p++ = c;
     }
     return buf;
@@ -32,14 +32,12 @@ int strcmp(const char *s1, const char *s2)
     return *(unsigned char *) s1 - *(unsigned char *) s2;
 }
 
-void *strcpy(char *dst, const char *src )
+void *strcpy(char *dst, const char *src)
 {
-    while (*src)
-    {
+    while (*src) {
         *dst = *src;
         dst++;
         src++;
     }
     return dst;
 }
-

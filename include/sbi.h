@@ -15,3 +15,4 @@ struct sbiret sbi_call(long arg0,
                        long eid);
 
 struct sbiret sbi_get_spec_version(void);
+struct sbiret sbi_get_mvendorid(void);

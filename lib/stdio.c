@@ -1,6 +1,6 @@
 #include "include/libc.h"
-#include "type.h"
 #include "include/sbi.h"
+#include "type.h"
 
 void putchar(char ch)
 {
@@ -55,15 +55,14 @@ void printf(const char *fmt, ...)
                     putchar(buf[i]);
                 break;
             }
-            case 'x':{
+            case 'x': {
                 unsigned value = va_arg(vargs, unsigned);
                 printf("0x");
-                for (int i = 7; i>=0; i--){
-                    unsigned nibble = (value >> (i*4)) & 0xF;
+                for (int i = 7; i >= 0; i--) {
+                    unsigned nibble = (value >> (i * 4)) & 0xF;
                     putchar("0123456789ABCDEF"[nibble]);
                 }
             }
-
             }
 
         } else {

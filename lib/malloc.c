@@ -2,7 +2,7 @@
 #include "include/sections.h"
 #include "type.h"
 
-#define PAGE_SIZE  4096 /* 4KB per page */
+#define PAGE_SIZE 4096 /* 4KB per page */
 
 void *page_allocate(size_t page)
 {

@@ -1,3 +1,4 @@
+#pragma once
 #include "type.h"
 /* Define buffer for task switching.
  * Memory layouts (14 x 32-bit words)
