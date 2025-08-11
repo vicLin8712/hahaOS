@@ -69,3 +69,9 @@ __attribute__((noreturn)) int32_t longjmp(jmp_buf env, int32_t val)
 
     __builtin_unreachable();
 }
+
+void hal_panic(void)
+{
+    while (1)
+        __asm__ __volatile__("wfi");
+}

@@ -12,3 +12,5 @@ typedef uint32_t jmp_buf[14];
 int32_t setjmp(jmp_buf env);
 /* Restore execution context only*/
 int32_t longjmp(jmp_buf env, int32_t val);
+
+void hal_panic(void);
