@@ -2,6 +2,8 @@
 #include "hal.h"
 #include "libc.h"
 #include "type.h"
+#include "sys/task.h"
+#include "sys/error.h"
 
 /* Define memory control block */
 typedef struct __memblock {
@@ -55,8 +57,14 @@ void *malloc(size_t size)
 {
     memblock_t *p = first_free;
     size = ALIGN4(size);
-    
     while (p) {
+        /* Avoid over heap_end */
+        if ((uint8_t *)p + size + sizeof(memblock_t) > (uint8_t *)__heap_end)
+        {
+            panic(ERR_MALLOC);
+            return false;
+        }
+
         if (!IS_USED(p) && GET_SIZE(p) >= size) {
             size_t remaining = GET_SIZE(p) - size;
 
@@ -76,6 +84,8 @@ void *malloc(size_t size)
         }
         p = p->next;
     }
+    panic(ERR_MALLOC);
+
 }
 
 

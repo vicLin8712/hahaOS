@@ -18,6 +18,7 @@ static const struct err_code desc[] = {
     {ERR_STACK_CHECK,
      "Stack malloc overflow or corruption"}, /* Stack overflow or corruption
                                                 detected */
+    {ERR_MALLOC, "Malloc out of heap bottom! "},
     {ERR_UNKNOWN, "Unknow error happened! "},
 };
 

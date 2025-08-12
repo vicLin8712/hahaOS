@@ -16,6 +16,9 @@ enum {
     /* Memory Protection Error*/
     ERR_STACK_CHECK, /* Stack overflow or corruption detected */
 
+    /* Heap Fail*/
+    ERR_MALLOC,
+
     ERR_UNKNOWN /* Unknow error, the last error case */
 
 };
