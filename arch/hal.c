@@ -64,7 +64,7 @@ __attribute__((noreturn)) int32_t longjmp(jmp_buf env, int32_t val)
         /* "Return" to the restored 'ra', effectively jumping to new context */
         "ret\n"
         :
-    : "r"(env), "r"(val)
+        : "r"(env), "r"(val)
         : "memory");
 
     __builtin_unreachable();

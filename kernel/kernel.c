@@ -1,15 +1,15 @@
-#include "libc.h"
 #include "hal.h"
 #include "include/sbi.h"
 #include "include/sys/task.h"
 #include "lib/malloc.h"
+#include "libc.h"
 
 
 
 void kernel_main(void)
 {
-    memset(__bss, 0, (size_t)__bss_end - (size_t)__bss);
-    heap_init((void *)&__heap_top, (size_t)&__heap_size);
+    memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
+    heap_init((void *) &__heap_top, (size_t) &__heap_size);
 
     while (1) {
         __asm__ __volatile__("wfi");

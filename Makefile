@@ -15,6 +15,8 @@ QEMU = qemu-system-riscv32
 QEMU_FLAGS = -machine virt -bios default -nographic -serial mon:stdio --no-reboot
 QEMU_GDB = -machine virt -bios default -nographic -serial mon:stdio --no-reboot -s -S
 
+FMT_SRCS := $(shell find . \( -name "*.c" -o -name "*.h" \))
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -32,3 +34,6 @@ gdb: $(TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+format:
+	@clang-format -i $(FMT_SRCS)

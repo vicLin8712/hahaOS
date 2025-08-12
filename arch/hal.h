@@ -11,7 +11,6 @@ extern uint32_t __heap_size;
 
 
 
-
 /* Define buffer for task switching.
  * Memory layouts (14 x 32-bit words)
  * [0-11]: s0-s11 (callee-saved registers)

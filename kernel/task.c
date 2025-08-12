@@ -1,6 +1,6 @@
 #include "sys/task.h"
-#include "sys/error.h"
 #include "include/libc.h"
+#include "sys/error.h"
 #include "type.h"
 
 #define STACK_SIZE 8192
@@ -68,16 +68,15 @@ void yield(void)
 }
 
 /* Kernel panic */
-void panic(int32_t code) {
+void panic(int32_t code)
+{
     const char *msg = "unknown error";
-    for (size_t i = 0; perror[i].desc != ERR_UNKNOWN; ++i)
-    {
-        if (perror[i].code == code)
-        {
+    for (size_t i = 0; perror[i].desc != ERR_UNKNOWN; ++i) {
+        if (perror[i].code == code) {
             msg = perror[i].desc;
             break;
-        }   
+        }
     }
-    printf("\n *** KERNEL PANIC (%d) – %s\n", (int)code, msg);
+    printf("\n *** KERNEL PANIC (%d) – %s\n", (int) code, msg);
     hal_panic();
 }
