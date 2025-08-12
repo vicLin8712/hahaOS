@@ -53,26 +53,72 @@ void heap_init(uintptr_t *heap_top, size_t len)
 
 void *malloc(size_t size)
 {
-    memblock_t *c = first_free;
-    while (c) {
-        if (!IS_USED(c) && GET_SIZE(c) >= size) {
-            size_t remaining = GET_SIZE(c) - size;
+    memblock_t *p = first_free;
+    size = ALIGN4(size);
+    
+    while (p) {
+        if (!IS_USED(p) && GET_SIZE(p) >= size) {
+            size_t remaining = GET_SIZE(p) - size;
 
             if (remaining >= sizeof(memblock_t) + MIN_MALLOC_SIZE) {
                 /* Split block if the space is enough */
                 memblock_t *new_block =
-                    (memblock_t *) ((size_t) c + sizeof(memblock_t) + size);
-                new_block->next = c->next;
+                    (memblock_t *) ((size_t) p + sizeof(memblock_t) + size);
+                new_block->next = p->next;
                 new_block->size = remaining - sizeof(memblock_t);
                 MARK_FREE(new_block);
-
-                c->next = new_block;
-                c->size = size;
+                p->next = new_block;
+                p->size = size;
             }
 
-            MARK_USED(c);
-            return (void *) (c + 1);
+            MARK_USED(p);
+            return (void *) (p + 1);
         }
-        c = c->next;
+        p = p->next;
+    }
+}
+
+
+void free(void *ptr)
+{
+    if (!ptr)
+        return;
+    
+    memblock_t *p = (memblock_t *)ptr - 1;
+    MARK_FREE(p);
+
+    /* Forward merge */
+    if (p->next && !IS_USED(p->next)&&(uint8_t *)p + sizeof(memblock_t)+GET_SIZE(p) == (uint8_t *)p->next)
+    {
+        p->size = GET_SIZE(p) + sizeof(memblock_t) + GET_SIZE(p->next);
+        p->next = p->next->next;
+    }
+
+    /* Backward merge */
+    memblock_t *prev = NULL;
+    memblock_t *current = first_free;
+    while (current && current != p) {
+        prev = current;
+        current = current->next;
+    }
+
+    if (prev && !IS_USED(prev) &&
+        (uint8_t *) prev + sizeof(memblock_t) + GET_SIZE(prev) ==
+            (uint8_t *) p) {
+        prev->size = GET_SIZE(prev) + sizeof(memblock_t) + GET_SIZE(p);
+        prev->next = p->next;
+    }
+
+}
+
+void check_memblock(void)
+{
+    memblock_t *cur = first_free;
+    int i = 0;
+    while (cur)
+    {
+        printf("Current memblock index is %d, address is %x\n", i + 1, cur);
+        cur = cur->next;
+        i++;
     }
 }
