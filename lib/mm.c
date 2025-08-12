@@ -1,5 +1,4 @@
 #include "include/libc.h"
-#include "include/sections.h"
 
 
 void *memset(void *buf, char c, size_t n)

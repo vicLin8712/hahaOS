@@ -5,9 +5,11 @@ extern char __bss[];
 extern char __bss_end[];
 extern char __stack_top[];
 
-extern char __free_ram[];
-extern char __free_ram_end[];
-extern size_t _heap_size;
+extern uint32_t __heap_top;
+extern uint32_t __heap_end;
+extern uint32_t __heap_size;
+
+
 
 
 /* Define buffer for task switching.

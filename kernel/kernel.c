@@ -2,39 +2,17 @@
 #include "hal.h"
 #include "include/sbi.h"
 #include "include/sys/task.h"
-
-void task_A()
-{
-    printf("task_A executed\n");
-    yield();
-}
-void task_B()
-{
-    printf("task_B executed\n");
-    yield();
-}
-
-void task_C()
-{
-    printf("task_C executed\n");
-    yield();
-}
-
-void task_D()
-{
-    printf("task_D executed\n");
-    task_A();
-}
+#include "lib/malloc.h"
 
 
 
 void kernel_main(void)
 {
     memset(__bss, 0, (size_t)__bss_end - (size_t)__bss);
-
+    heap_init((void *)&__heap_top, (size_t)&__heap_size);
 
     while (1) {
-        sched();
+        __asm__ __volatile__("wfi");
     };
 }
 

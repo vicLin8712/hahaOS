@@ -1,6 +1,7 @@
 #include "include/lib/malloc.h"
 #include "type.h"
 #include "hal.h"
+#include "libc.h"
 
 /* Define memory control block */
 typedef struct __memblock {
@@ -18,7 +19,7 @@ typedef struct __memblock {
 static memblock_t *first_free;
 static void *heap_start, *heap_end;
 
-void heap_init(uintptr_t *heap_bottom, size_t len)
+void heap_init(uintptr_t *heap_top, size_t len)
 {
     memblock_t *start, *end;
 
@@ -27,8 +28,8 @@ void heap_init(uintptr_t *heap_bottom, size_t len)
     len = ((len + 3u) >> 2) << 2;
 
     /* Assign start and end memory control block as initial */
-    start = (memblock_t *)heap_bottom;
-    end = (memblock_t *)(start + len - sizeof(memblock_t));
+    start = (memblock_t *)heap_top;
+    end = (memblock_t *)((size_t)start + len - sizeof(memblock_t));
 
     /* Connect each memblock */
     start->next = end;
@@ -43,6 +44,6 @@ void heap_init(uintptr_t *heap_bottom, size_t len)
     MARK_USED(end);
 
     first_free = start;
-    heap_start = heap_bottom;
-    heap_end = (uintptr_t *)end + len;
+    heap_start = (void*) heap_top;
+    heap_end = (void *) ((size_t) end + sizeof(memblock_t));
 }
