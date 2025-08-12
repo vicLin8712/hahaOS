@@ -1,5 +1,7 @@
 ENTRY(boot)
 
+_heap_size = _heap_bottom-_heap_start;
+
 SECTIONS {
     . = 0x80200000;
 
@@ -22,12 +24,13 @@ SECTIONS {
         __bss_end = .;
     }
 
+    _heap_start = .;
+    . += 64 * 1024 * 1024; /* 64 MB memory */
+    _heap_bottom = .;
+
     . = ALIGN(4);
     . += 128 * 1024; /* 128KB */
     __stack_top = .;
 
-    . = ALIGN(4096);
-    __free_ram = .;
-    . += 64 * 1024 * 1024; /* 64 MB memory */
-    __free_ram_end = .;
+
 }
