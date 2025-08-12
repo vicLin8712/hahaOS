@@ -1,12 +1,48 @@
 #include "include/lib/malloc.h"
-#include "include/sections.h"
 #include "type.h"
+#include "hal.h"
 
-#define PAGE_SIZE 4096 /* 4KB per page */
+/* Define memory control block */
+typedef struct __memblock {
+    struct __memblock *next;
+    size_t size;        // Last bit used for control flag as below defined
+}memblock_t;
 
-void *page_allocate(size_t page)
+/* Define memory block flags */
+#define IS_USED(x)((x)->size & 1L)      // Check LSB
+#define GET_SIZE(x)((x)->size & ~1L)    // Get size without flag
+#define MARK_USED(x)((x)->size |= 1L)   // Set flag 1
+#define MARK_FREE(x)((x)->size &= ~1L)  // Set flag 0
+
+/* Record memblock */
+static memblock_t *first_free;
+static void *heap_start, *heap_end;
+
+void heap_init(uintptr_t *heap_bottom, size_t len)
 {
-    char *begin = (char *) __free_ram;
-    char *end = begin + page * PAGE_SIZE;
-    memset(begin, '0', page * PAGE_SIZE);
+    memblock_t *start, *end;
+
+    
+    /* Align heap size to 4 bytes */
+    len = ((len + 3u) >> 2) << 2;
+
+    /* Assign start and end memory control block as initial */
+    start = (memblock_t *)heap_bottom;
+    end = (memblock_t *)(start + len - sizeof(memblock_t));
+
+    /* Connect each memblock */
+    start->next = end;
+    end->next = NULL;
+
+    /* Assign each mem size */
+    start->size = len - 2 * sizeof(memblock_t);
+    end->size = 0;
+
+    /* Setup each memblock status */
+    MARK_FREE(start);
+    MARK_USED(end);
+
+    first_free = start;
+    heap_start = heap_bottom;
+    heap_end = (uintptr_t *)end + len;
 }

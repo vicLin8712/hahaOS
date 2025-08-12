@@ -1,6 +1,6 @@
-#include "include/libc.h"
+#include "libc.h"
+#include "hal.h"
 #include "include/sbi.h"
-#include "include/sections.h"
 #include "include/sys/task.h"
 
 void task_A()
@@ -31,9 +31,7 @@ void task_D()
 void kernel_main(void)
 {
     memset(__bss, 0, (size_t)__bss_end - (size_t)__bss);
-    create_task((uint32_t) &task_A);
-    create_task((uint32_t) &task_B);
-    sched_select_next_task();
+
 
     while (1) {
         sched();
