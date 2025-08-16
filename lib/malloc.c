@@ -1,9 +1,9 @@
 #include "include/lib/malloc.h"
 #include "hal.h"
 #include "libc.h"
-#include "type.h"
-#include "sys/task.h"
 #include "sys/error.h"
+#include "sys/task.h"
+#include "type.h"
 
 /* Define memory control block */
 typedef struct __memblock {
@@ -34,7 +34,9 @@ void heap_init(uintptr_t *heap_top, size_t len)
 
     /* Assign start and end memory control block as initial */
     start = (memblock_t *) heap_top;
-    end = (memblock_t *) ((size_t) start + len - sizeof(memblock_t));
+    end = (memblock_t *)((size_t)start + len - sizeof(memblock_t));
+    printf("start is %x\n", start);
+    printf("end is %x \n", end);
 
     /* Connect each memblock */
     start->next = end;
@@ -58,12 +60,7 @@ void *malloc(size_t size)
     memblock_t *p = first_free;
     size = ALIGN4(size);
     while (p) {
-        /* Avoid over heap_end */
-        if ((uint8_t *)p + size + sizeof(memblock_t) > (uint8_t *)__heap_end)
-        {
-            panic(ERR_MALLOC);
-            return false;
-        }
+       
 
         if (!IS_USED(p) && GET_SIZE(p) >= size) {
             size_t remaining = GET_SIZE(p) - size;
@@ -85,7 +82,6 @@ void *malloc(size_t size)
         p = p->next;
     }
     panic(ERR_MALLOC);
-
 }
 
 
@@ -93,13 +89,14 @@ void free(void *ptr)
 {
     if (!ptr)
         return;
-    
-    memblock_t *p = (memblock_t *)ptr - 1;
+
+    memblock_t *p = (memblock_t *) ptr - 1;
     MARK_FREE(p);
 
     /* Forward merge */
-    if (p->next && !IS_USED(p->next)&&(uint8_t *)p + sizeof(memblock_t)+GET_SIZE(p) == (uint8_t *)p->next)
-    {
+    if (p->next && !IS_USED(p->next) &&
+        (uint8_t *) p + sizeof(memblock_t) + GET_SIZE(p) ==
+            (uint8_t *) p->next) {
         p->size = GET_SIZE(p) + sizeof(memblock_t) + GET_SIZE(p->next);
         p->next = p->next->next;
     }
@@ -118,15 +115,13 @@ void free(void *ptr)
         prev->size = GET_SIZE(prev) + sizeof(memblock_t) + GET_SIZE(p);
         prev->next = p->next;
     }
-
 }
 
 void check_memblock(void)
 {
     memblock_t *cur = first_free;
     int i = 0;
-    while (cur)
-    {
+    while (cur) {
         printf("Current memblock index is %d, address is %x\n", i + 1, cur);
         cur = cur->next;
         i++;

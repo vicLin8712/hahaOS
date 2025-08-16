@@ -10,6 +10,8 @@ extern uint32_t __heap_end;
 extern uint32_t __heap_size;
 
 #define ALIGN4(x) (((x + 3u) >> 2) << 2)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#define likely(x) __builtin_expect(!!(x), 1)
 
 /* Define buffer for task switching.
  * Memory layouts (14 x 32-bit words)
