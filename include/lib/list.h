@@ -1,11 +1,25 @@
 #pragma once
 #include "lib/malloc.h"
-#include "type.h"
 
+#if defined(UNIT_TEST)
+#  include <stddef.h>
+#  include <stdint.h>
+#else
+#  include "type.h"
+#endif
+
+
+#ifndef likely
+#  define likely(x)   __builtin_expect(!!(x), 1)
+#endif
+
+#ifndef unlikely
+#  define unlikely(x) __builtin_expect(!!(x), 0)
+#endif
 
 /* List node definition */
 typedef struct list_node {
-    list_node_t *next;
+    struct list_node *next;
     void *data;
 } list_node_t;
 
@@ -15,6 +29,11 @@ typedef struct {
     list_node_t *tail;
     size_t length;
 } list_t;
+
+static inline int list_is_empty(const list_t *list)
+{
+    return !list || list->length == 0U;
+}
 
 static inline list_t *list_init(void)
 {
@@ -35,28 +54,6 @@ static inline list_t *list_init(void)
 
     return list;
 }
-/* Insert new node @new at the end of the @list */
-static inline void *list_add_tail(list_t *list, list_node_t *new)
-{
-    if (unlikely(!list || new))
-        return NULL;
-    list_node_t *node = list->head;
-    while (node->next != list->tail)
-        node = node->next;
-
-    node->next = new;
-    new->next = list->tail;
-    list->length++;
-}
-/* Insert new node @new at the head of the @list */
-static inline void *list_add_head(list_t *list, list_node_t *new)
-{
-    if (unlikely(!list || new))
-        return NULL;
-    new->next = list->head->next;
-    list->head->next = new;
-    list->length++;
-}
 
 /* Pop and push data */
 static inline void *list_pop(list_t *list)
@@ -71,4 +68,39 @@ static inline void *list_pop(list_t *list)
 
     list->length--;
     return data;
+}
+
+static inline void *list_push(list_t *list, void *data)
+{
+    if (unlikely(!list || !data))
+        return NULL;
+
+    list_node_t **new_node = &list->head;
+    while ((*new_node)->next != list->tail)
+        new_node = &(*new_node)->next;
+
+    (*new_node) ->next = malloc(sizeof(list_node_t));
+    (*new_node)->next->data = data;
+    (*new_node)->next->next = list->tail;
+    list->length++;
+
+}
+
+/* Clear and destroy list */
+static inline void list_clear(list_t *list)
+{
+    if (unlikely(!list))
+        return;
+    while (!list_is_empty(list))
+        list_pop(list);
+}
+
+static inline void list_destroy(list_t *list)
+{
+    if (unlikely(!list))
+        return;
+    list_clear(list);
+    free(list->head);
+    free(list->tail);
+    free(list);
 }

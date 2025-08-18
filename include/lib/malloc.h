@@ -1,4 +1,9 @@
-#include "type.h"
+#if defined(UNIT_TEST)
+#  include <stddef.h>
+#  include <stdint.h>
+#else
+#  include "type.h"
+#endif
 
 
 /* First-fit malloc */
