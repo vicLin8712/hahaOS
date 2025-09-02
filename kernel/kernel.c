@@ -1,5 +1,4 @@
 #include "hal.h"
-#include "include/sbi.h"
 #include "include/sys/task.h"
 #include "lib/malloc.h"
 #include "libc.h"

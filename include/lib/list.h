@@ -1,14 +1,6 @@
 #pragma once
 #include "lib/malloc.h"
 
-#if defined(UNIT_TEST)
-#  include <stddef.h>
-#  include <stdint.h>
-#else
-#  include "type.h"
-#endif
-
-
 #ifndef likely
 #  define likely(x)   __builtin_expect(!!(x), 1)
 #endif
