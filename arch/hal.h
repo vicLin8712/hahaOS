@@ -13,6 +13,13 @@ extern uint32_t __heap_size;
 #define unlikely(x) __builtin_expect(!!(x), 0)
 #define likely(x) __builtin_expect(!!(x), 1)
 
+#define read_csr(reg)                                 \
+    ({                                                \
+        uint32_t __tmp;                               \
+        asm volatile("csrr %0, " #reg : "=r"(__tmp)); \
+        __tmp;                                        \
+    })
+
 /* Define buffer for task switching.
  * Memory layouts (14 x 32-bit words)
  * [0-11]: s0-s11 (callee-saved registers)

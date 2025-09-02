@@ -35,8 +35,6 @@ void heap_init(uintptr_t *heap_top, size_t len)
     /* Assign start and end memory control block as initial */
     start = (memblock_t *) heap_top;
     end = (memblock_t *)((size_t)start + len - sizeof(memblock_t));
-    printf("start is %x\n", start);
-    printf("end is %x \n", end);
 
     /* Connect each memblock */
     start->next = end;

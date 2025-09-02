@@ -12,17 +12,7 @@ void kernel_main(void)
     heap_init((void *) &__heap_top, (size_t) &__heap_size);
 
     int i = 1;
-    for (;;) {
-        char *tmp = malloc(1024 );
-        printf("%d-th malloc, address is %x\n", i, tmp);
-        if (!tmp) {
-            heap_init((void *) &__heap_top, (size_t) &__heap_size);
-            i = 1;
-            continue;
-        }
-
-        i++;
-    }
+    
 
     while (1) {
         __asm__ __volatile__("wfi");
