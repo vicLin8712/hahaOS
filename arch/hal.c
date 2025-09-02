@@ -17,6 +17,45 @@
 #define CONTEXT_S11 11 /* s11(x27) - Callee-saved register */
 #define CONTEXT_SP 12  /* sp (x2)  - Stack Pointer */
 
+/* NS16550A UART0 - Memory-mapped registers for the QEMU 'virt' machine's serial
+ * port.
+ */
+
+#define NS16550A_UART0_BASE 0x10000000U
+#define NS16550A_UART0_REG(off) \
+    (*(volatile uint8_t *) (NS16550A_UART0_BASE + (off)))
+
+ /* UART register offsets */
+#define NS16550A_THR 0x00 /* Transmission holding register */  
+#define NS16550A_RBR 0x00 /* Reception buffer register */
+#define NS16550A_DLH 0x00 /* Divisor latch high (DLAB = 1) */
+#define NS16550A_DLL 0x01 /* Divisor latch low (DLAB = 1) */
+#define NS16550A_LCR 0x03 /* Line Control Register */
+#define NS16550A_LSR 0x05 /* Line Status Register */
+
+/* Line Status Register bits */
+#define NS16550A_LSR_DR 0x01 /* Data Ready: byte received */
+/* Transmit Holding Register Empty: ready to send */
+#define NS16550A_LSR_THRE 0x20
+
+/* Line Control Register bits */
+#define NS16550A_LCR_8BIT 0x03 /* 8-bit chars, no parity, 1 stop bit (8N1) */
+#define NS16550A_LCR_DLAB 0x80 /* Divisor Latch Access Bit */
+
+/* Low-level I/O and delay */
+static int __putchar(int value)
+{
+    volatile uint32_t timeout = 0x100000;
+    while (!(NS16550A_UART0_REG(NS16550A_LSR) & NS16550A_LSR_THRE))
+    {
+        if (unlikely(--timeout == 0))
+            return 0;
+    }
+    NS16550A_UART0_REG(NS16550A_THR) = (uint8_t)value;
+    return value;
+}
+
+
 int32_t setjmp(jmp_buf env)
 {
     __asm__ __volatile__(

@@ -1,11 +1,7 @@
 #include "include/libc.h"
-#include "include/sbi.h"
+#include "hal.h"
 #include "type.h"
 
-void putchar(char ch)
-{
-    sbi_call(ch, 0, 0, 0, 0, 0, 0, 1 /* Console Putchar */);
-}
 
 void printf(const char *fmt, ...)
 {
@@ -17,18 +13,18 @@ void printf(const char *fmt, ...)
             fmt++;
             switch (*fmt) {
             case '\0': {
-                putchar('%');
+                __putchar('%');
                 goto end;
             }
             case '%': {
-                putchar('%');
+                __putchar('%');
                 break;
             }
             // String Type
             case 's': {
                 const char *s = va_arg(vargs, const char *);
                 while (*s) {
-                    putchar(*s);
+                    __putchar(*s);
                     s++;
                 }
                 break;
@@ -37,11 +33,11 @@ void printf(const char *fmt, ...)
             case 'd': {
                 int value = va_arg(vargs, int);
                 if (value == 0) {
-                    putchar('0');
+                    __putchar('0');
                     break;
                 }
                 if (value < 0) {
-                    putchar('-');
+                    __putchar('-');
                     value = -value;
                 }
 
@@ -52,7 +48,7 @@ void printf(const char *fmt, ...)
                     value /= 10;
                 }
                 while (i--)
-                    putchar(buf[i]);
+                    __putchar(buf[i]);
                 break;
             }
             case 'x': {
@@ -60,13 +56,13 @@ void printf(const char *fmt, ...)
                 printf("0x");
                 for (int i = 7; i >= 0; i--) {
                     unsigned nibble = (value >> (i * 4)) & 0xF;
-                    putchar("0123456789ABCDEF"[nibble]);
+                    __putchar("0123456789ABCDEF"[nibble]);
                 }
             }
             }
 
         } else {
-            putchar(*fmt);
+            __putchar(*fmt);
         }
         fmt++;
     }
