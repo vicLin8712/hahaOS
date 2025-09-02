@@ -13,18 +13,18 @@ void printf(const char *fmt, ...)
             fmt++;
             switch (*fmt) {
             case '\0': {
-                __putchar('%');
+                putchar('%');
                 goto end;
             }
             case '%': {
-                __putchar('%');
+                putchar('%');
                 break;
             }
             // String Type
             case 's': {
                 const char *s = va_arg(vargs, const char *);
                 while (*s) {
-                    __putchar(*s);
+                    putchar(*s);
                     s++;
                 }
                 break;
@@ -33,11 +33,11 @@ void printf(const char *fmt, ...)
             case 'd': {
                 int value = va_arg(vargs, int);
                 if (value == 0) {
-                    __putchar('0');
+                    putchar('0');
                     break;
                 }
                 if (value < 0) {
-                    __putchar('-');
+                    putchar('-');
                     value = -value;
                 }
 
@@ -48,7 +48,7 @@ void printf(const char *fmt, ...)
                     value /= 10;
                 }
                 while (i--)
-                    __putchar(buf[i]);
+                    putchar(buf[i]);
                 break;
             }
             case 'x': {
@@ -56,13 +56,13 @@ void printf(const char *fmt, ...)
                 printf("0x");
                 for (int i = 7; i >= 0; i--) {
                     unsigned nibble = (value >> (i * 4)) & 0xF;
-                    __putchar("0123456789ABCDEF"[nibble]);
+                    putchar("0123456789ABCDEF"[nibble]);
                 }
             }
             }
 
         } else {
-            __putchar(*fmt);
+            putchar(*fmt);
         }
         fmt++;
     }

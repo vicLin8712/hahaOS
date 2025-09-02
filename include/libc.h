@@ -7,5 +7,4 @@ int strcmp(const char *s1, const char *s2);
 void *strcpy(char *dst, const char *src);
 void *page_allocate(size_t page);
 
-void putchar(char ch);
 void printf(const char *fmt, ...);

@@ -33,4 +33,6 @@ int32_t setjmp(jmp_buf env);
 /* Restore execution context only*/
 int32_t longjmp(jmp_buf env, int32_t val);
 
+int putchar(int);
+void uart_init(uint32_t);
 void hal_panic(void);

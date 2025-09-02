@@ -8,9 +8,10 @@
 void kernel_main(void)
 {
     memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
-    heap_init((void *) &__heap_top, (size_t) &__heap_size);
+    heap_init((void *)&__heap_top, (size_t)&__heap_size);
+    uart_init(115200);
 
-    int i = 1;
+    printf("\n\n\n\nHI,QEMU");
     
 
     while (1) {

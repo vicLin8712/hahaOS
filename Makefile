@@ -6,7 +6,7 @@ LDFLAGS = -Wl,-Tarch/kernel.ld -Wl,-Map=build/kernel.map
 
 BUILD_DIR = build
 
-SRCS = kernel/kernel.c kernel/task.c kernel/error.c lib/mm.c lib/stdio.c lib/sbi.c lib/malloc.c arch/hal.c
+SRCS = kernel/kernel.c kernel/task.c kernel/error.c lib/mm.c lib/stdio.c  lib/malloc.c arch/hal.c
 OBJS = $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
 TARGET = $(BUILD_DIR)/kernel.elf

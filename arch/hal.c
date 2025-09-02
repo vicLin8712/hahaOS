@@ -43,7 +43,7 @@
 #define NS16550A_LCR_DLAB 0x80 /* Divisor Latch Access Bit */
 
 /* Low-level I/O and delay */
-static int __putchar(int value)
+int putchar(int value)
 {
     volatile uint32_t timeout = 0x100000;
     while (!(NS16550A_UART0_REG(NS16550A_LSR) & NS16550A_LSR_THRE))
@@ -53,6 +53,21 @@ static int __putchar(int value)
     }
     NS16550A_UART0_REG(NS16550A_THR) = (uint8_t)value;
     return value;
+}
+
+/* Initiallize UART */
+void uart_init(uint32_t baud)
+{
+    uint32_t divisor = 10000000 / (16 * baud);
+    if (unlikely(!divisor))
+        divisor = 1; /* Ensure non-zero divisor */
+
+    /* Set DLAB to access divisor registers */
+    NS16550A_UART0_REG(NS16550A_LCR) = NS16550A_LCR_DLAB;
+    NS16550A_UART0_REG(NS16550A_DLH) = (divisor >> 8) & 0xff;
+    NS16550A_UART0_REG(NS16550A_DLL) = divisor & 0xff;
+    /* Clear DLAB and set line control to 8N1 mode */
+    NS16550A_UART0_REG(NS16550A_LCR) = NS16550A_LCR_8BIT;
 }
 
 
