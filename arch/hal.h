@@ -3,7 +3,6 @@
 
 extern char __bss[];
 extern char __bss_end[];
-extern char __stack_top[];
 
 extern uint32_t __heap_top;
 extern uint32_t __heap_end;

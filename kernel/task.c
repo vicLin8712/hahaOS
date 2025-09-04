@@ -4,20 +4,20 @@
 #include "type.h"
 
 #define STACK_SIZE 8192
-struct task tasks[PROCS_MAX];
-kcb_t kernel_state = {.tasks = (uint32_t *) &tasks,
-                      .cur_task = NULL,
+struct tcb tcbs[PROCS_MAX];
+kcb_t kernel_state = {.tcbs = (uint32_t *) &tcbs,
+                      .cur_tcb = NULL,
                       .pid_assign = 0};
 kcb_t *kcb = &kernel_state;
 
 int32_t create_task(uint32_t entry)
 {
-    struct task *available = NULL;
+    struct tcb*available = NULL;
 
     /* Search available task memory in the array */
     for (int index = 0; index < PROCS_MAX; index++) {
-        if (tasks[index].state == NO_TASK) {
-            available = &tasks[index];
+        if (tcbs[index].state == NO_TASK) {
+            available = &tcbs[index];
             break;
         }
     }
@@ -43,11 +43,11 @@ int32_t create_task(uint32_t entry)
 uint8_t sched_select_next_task(void)
 {
     for (int i = 0; i < PROCS_MAX; i++) {
-        if (tasks[i].state == TASK_READY) {
+        if (tcbs[i].state == TASK_READY) {
             printf("FIND TASKS\n");
             for (int j = 0; j < 300000000; j++)
                 ;
-            kcb->cur_task = &tasks[i];
+            kcb->cur_tcb = &tcbs[i];
             return 1;
         }
     }
@@ -56,13 +56,13 @@ uint8_t sched_select_next_task(void)
 
 void sched(void)
 {
-    longjmp(kcb->cur_task->context, 1);
+    longjmp(kcb->cur_tcb->context, 1);
 }
 
 void yield(void)
 {
-    kcb->cur_task->state = TASK_STOPPED;
-    setjmp(kcb->cur_task->context);
+    kcb->cur_tcb->state = TASK_STOPPED;
+    setjmp(kcb->cur_tcb->context);
     sched_select_next_task();
     sched();
 }

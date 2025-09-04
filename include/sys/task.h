@@ -6,13 +6,13 @@
 #define PROCS_MAX 8
 
 /* End tcb (can put new tcb)*/
-#define NO_tcb 0
+#define NO_TASK 0
 /* Ready to run tcb*/
-#define tcb_READY 1
+#define TASK_READY 1
 /* Runnable tcb */
-#define tcb_RUNNING 2
+#define TASK_RUNNING 2
 /* Stop tcb (can be resumed)*/
-#define tcb_STOPPED 3
+#define TASK_STOPPED 3
 
 struct tcb {
     uint32_t entry; /* new function entry address */
