@@ -2,19 +2,19 @@
 #include "hal.h"
 #include "type.h"
 
-/* Max number of task */
+/* Max number of tcb */
 #define PROCS_MAX 8
 
-/* End task (can put new task)*/
-#define NO_TASK 0
-/* Ready to run task*/
-#define TASK_READY 1
-/* Runnable task */
-#define TASK_RUNNING 2
-/* Stop task (can be resumed)*/
-#define TASK_STOPPED 3
+/* End tcb (can put new tcb)*/
+#define NO_tcb 0
+/* Ready to run tcb*/
+#define tcb_READY 1
+/* Runnable tcb */
+#define tcb_RUNNING 2
+/* Stop tcb (can be resumed)*/
+#define tcb_STOPPED 3
 
-struct task {
+struct tcb {
     uint32_t entry; /* new function entry address */
     int32_t pid;
     int32_t state;
@@ -23,20 +23,20 @@ struct task {
 };
 
 typedef struct {
-    struct task *tasks;    /* Data structure store all tasks */
-    struct task *cur_task; /* Current running task */
-    uint8_t pid_assign;    /* Check pid and assign to new task */
+    struct tcb *tcbs;    /* Data structure store all tcbs */
+    struct tcb *cur_tcb; /* Current running tcb */
+    uint8_t pid_assign;    /* Check pid and assign to new tcb */
 
 
 } kcb_t;
 
 extern kcb_t *kcb;
 
-extern struct task tasks[PROCS_MAX];
+extern struct tcb tcbs[PROCS_MAX];
 /* Scheduler */
-int32_t create_task(uint32_t pc);
-/* Find next available task*/
-uint8_t sched_select_next_task(void);
+int32_t create_tcb(uint32_t pc);
+/* Find next available tcb*/
+uint8_t sched_select_next_tcb(void);
 /* Schedule process */
 void sched(void);
 /* Yield to sched*/

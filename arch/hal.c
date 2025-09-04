@@ -42,6 +42,18 @@
 #define NS16550A_LCR_8BIT 0x03 /* 8-bit chars, no parity, 1 stop bit (8N1) */
 #define NS16550A_LCR_DLAB 0x80 /* Divisor Latch Access Bit */
 
+/* CLINT registers
+* only mtime and mtimecmp used here
+*/
+#define CLINT_BASE 0x20000000
+#define MTIMECMP (*(volatile uint64_t* (CLINT_BASE+0x4000u)))
+#define MTIME (*(volatile uint64_t* (CLINT_BASE+0xBFF8u)))
+
+#define MTIMECMP_L (* (volatile uint32_t* (CLINT_BASE+0x4000u)))
+#define MTIMECMP_H (* (volatile uint32_t* (CLINT_BASE+0x4004u)))
+#define MTIME_L (*(volatile uint32_t *)(CLINT_BASE + 0xBFF8u))
+#define MTIME_H (*(volatile uint32_t *)(CLINT_BASE + 0xBFFCu))
+
 /* Low-level I/O and delay */
 int putchar(int value)
 {
@@ -55,7 +67,7 @@ int putchar(int value)
     return value;
 }
 
-/* Initiallize UART */
+/* Initialize UART */
 void uart_init(uint32_t baud)
 {
     uint32_t divisor = 10000000 / (16 * baud);
