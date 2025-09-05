@@ -1,4 +1,6 @@
 #include "hal.h"
+#include "libc.h"
+#include "sys/task.h"
 #include "type.h"
 
 
@@ -25,8 +27,8 @@
 #define NS16550A_UART0_REG(off) \
     (*(volatile uint8_t *) (NS16550A_UART0_BASE + (off)))
 
- /* UART register offsets */
-#define NS16550A_THR 0x00 /* Transmission holding register */  
+/* UART register offsets */
+#define NS16550A_THR 0x00 /* Transmission holding register */
 #define NS16550A_RBR 0x00 /* Reception buffer register */
 #define NS16550A_DLH 0x00 /* Divisor latch high (DLAB = 1) */
 #define NS16550A_DLL 0x01 /* Divisor latch low (DLAB = 1) */
@@ -43,34 +45,34 @@
 #define NS16550A_LCR_DLAB 0x80 /* Divisor Latch Access Bit */
 
 /* CLINT registers
-* only mtime and mtimecmp used here
-*/
-#define CLINT_BASE 0x20000000
-#define MTIMECMP (*(volatile uint64_t* (CLINT_BASE+0x4000u)))
-#define MTIME (*(volatile uint64_t* (CLINT_BASE+0xBFF8u)))
+ * only mtime and mtimecmp used here
+ */
+#define CLINT_BASE 0x02000000UL
 
-#define MTIMECMP_L (* (volatile uint32_t* (CLINT_BASE+0x4000u)))
-#define MTIMECMP_H (* (volatile uint32_t* (CLINT_BASE+0x4004u)))
-#define MTIME_L (*(volatile uint32_t *)(CLINT_BASE + 0xBFF8u))
-#define MTIME_H (*(volatile uint32_t *)(CLINT_BASE + 0xBFFCu))
+#define MTIMECMP (*(volatile uint64_t *) (CLINT_BASE + 0x4000u))
+#define MTIMECMP_L (*(volatile uint32_t *) (CLINT_BASE + 0x4000u))
+#define MTIMECMP_H (*(volatile uint32_t *) (CLINT_BASE + 0x4004u))
+
+#define MTIME (*(volatile uint64_t *) (CLINT_BASE + 0xBFF8u))
+#define MTIME_L (*(volatile uint32_t *) (CLINT_BASE + 0xBFF8u))
+#define MTIME_H (*(volatile uint32_t *) (CLINT_BASE + 0xBFFCu))
 
 /* Low-level I/O and delay */
 int putchar(int value)
 {
     volatile uint32_t timeout = 0x100000;
-    while (!(NS16550A_UART0_REG(NS16550A_LSR) & NS16550A_LSR_THRE))
-    {
+    while (!(NS16550A_UART0_REG(NS16550A_LSR) & NS16550A_LSR_THRE)) {
         if (unlikely(--timeout == 0))
             return 0;
     }
-    NS16550A_UART0_REG(NS16550A_THR) = (uint8_t)value;
+    NS16550A_UART0_REG(NS16550A_THR) = (uint8_t) value;
     return value;
 }
 
 /* Initialize UART */
 void uart_init(uint32_t baud)
 {
-    uint32_t divisor = 10000000 / (16 * baud);
+    uint32_t divisor = F_CPU / (16 * baud);
     if (unlikely(!divisor))
         divisor = 1; /* Ensure non-zero divisor */
 
@@ -134,6 +136,62 @@ __attribute__((noreturn)) int32_t longjmp(jmp_buf env, int32_t val)
         : "memory");
 
     __builtin_unreachable();
+}
+
+
+int hal_context_save(jmp_buf env)
+{
+    if ((unlikely(!env)))
+        return -1;
+
+    __asm__ __volatile__(
+        /* Store callee saved registers and ra sp*/
+        "sw s0, 0*4(%0)\n"
+        "sw s1, 1*4(%0)\n"
+        "sw s2, 2*4(%0)\n"
+        "sw s3, 3*4(%0)\n"
+        "sw s4, 4*4(%0)\n"
+        "sw s5, 5*4(%0)\n"
+        "sw s6, 6*4(%0)\n"
+        "sw s7, 7*4(%0)\n"
+        "sw s8, 8*4(%0)\n"
+        "sw s9,9*4(%0)\n"
+        "sw s10, 10*4(%0)\n"
+        "sw s11, 11*4(%0)\n"
+        "sw sp, 12*4(%0)\n"
+        "sw ra, 13*4(%0)\n"
+
+        /* Recover MIE by MPIE */
+        "csrr t0, mstatus\n"
+        "andi t1, t0, ~8\n" /* clear MIE bit */
+        "srli t2, t0, 4\n"  /* move MPIE down */
+        "andi t2, t2, 8\n"  /* isolate */
+        "or   t1, t1, t2\n" /* combine */
+        "sw   t1, 14*4(%0)\n"
+
+        "li a0, 0\n"
+        :
+        : "r"(env)
+        : "t0", "t1", "t2", "memory", "a0");
+    return 0;
+}
+/* Trap control */
+void do_trap()
+{
+    /* Read time & reset new time */
+    uint64_t current = ((uint64_t) MTIME_H << 32) | MTIME_L;
+    uint64_t newtime =
+        current + 1000 * F_CPU / 1000; /* Timer interrupt per ms */
+
+    MTIMECMP_H = 0xFFFFFFFFu;
+    MTIMECMP_L = (uint32_t) newtime;
+    MTIMECMP_H = (uint32_t) (newtime >> 32);
+
+
+    /* Find new task and put into kcb */
+    if (sched_select_next_task())
+        /* Jump to new tasks */
+        longjmp(kcb->cur_tcb->context, 1);
 }
 
 void hal_panic(void)

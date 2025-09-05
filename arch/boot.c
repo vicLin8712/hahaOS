@@ -5,19 +5,19 @@ extern char __stack_top[];
 
 void main(void);
 
-#define MIE (1u<<11)
+#define MIE (1u << 11)
 __attribute__((section(".text.boot"))) __attribute__((naked)) void _entry(void)
 {
     __asm__ __volatile__(
         "mv sp, %0\n"  // Set the stack pointer
 
-        "la t0, _isr\n" /* Load _isr address*/
+        "la t0, _isr\n"    /* Load _isr address*/
         "csrw mtvec, t0\n" /* Store _isr address to stvec */
 
         "li t0, 0x00000080\n"
         "csrw mie, t0\n"
         "csrs mstatus, 8\n"
-        "call main\n"        // Jump to the kernel main function
+        "call main\n"  // Jump to the kernel main function
         :
         : [stack_top] "r"(
             __stack_top)  // Pass the stack top address as %[stack_top]

@@ -8,9 +8,12 @@ extern uint32_t __heap_top;
 extern uint32_t __heap_end;
 extern uint32_t __heap_size;
 
+/* Define basic operation */
 #define ALIGN4(x) (((x + 3u) >> 2) << 2)
 #define unlikely(x) __builtin_expect(!!(x), 0)
 #define likely(x) __builtin_expect(!!(x), 1)
+
+#define F_CPU 10000000
 
 #define read_csr(reg)                                 \
     ({                                                \
@@ -18,6 +21,8 @@ extern uint32_t __heap_size;
         asm volatile("csrr %0, " #reg : "=r"(__tmp)); \
         __tmp;                                        \
     })
+#define write_csr(reg, val) \
+    ({ __asm__ __volatile__(" csrw " #reg ", %0" ::" r"(val)); })
 
 /* Define buffer for task switching.
  * Memory layouts (14 x 32-bit words)
@@ -35,3 +40,4 @@ int32_t longjmp(jmp_buf env, int32_t val);
 int putchar(int);
 void uart_init(uint32_t);
 void hal_panic(void);
+void do_trap(void);

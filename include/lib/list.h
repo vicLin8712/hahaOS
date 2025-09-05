@@ -2,11 +2,11 @@
 #include "lib/malloc.h"
 
 #ifndef likely
-#  define likely(x)   __builtin_expect(!!(x), 1)
+#define likely(x) __builtin_expect(!!(x), 1)
 #endif
 
 #ifndef unlikely
-#  define unlikely(x) __builtin_expect(!!(x), 0)
+#define unlikely(x) __builtin_expect(!!(x), 0)
 #endif
 
 /* List node definition */
@@ -71,11 +71,10 @@ static inline void *list_push(list_t *list, void *data)
     while ((*new_node)->next != list->tail)
         new_node = &(*new_node)->next;
 
-    (*new_node) ->next = malloc(sizeof(list_node_t));
+    (*new_node)->next = malloc(sizeof(list_node_t));
     (*new_node)->next->data = data;
     (*new_node)->next->next = list->tail;
     list->length++;
-
 }
 
 /* Clear and destroy list */

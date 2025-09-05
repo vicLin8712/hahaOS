@@ -25,7 +25,7 @@ struct tcb {
 typedef struct {
     struct tcb *tcbs;    /* Data structure store all tcbs */
     struct tcb *cur_tcb; /* Current running tcb */
-    uint8_t pid_assign;    /* Check pid and assign to new tcb */
+    uint8_t pid_assign;  /* Check pid and assign to new tcb */
 
 
 } kcb_t;
@@ -34,9 +34,9 @@ extern kcb_t *kcb;
 
 extern struct tcb tcbs[PROCS_MAX];
 /* Scheduler */
-int32_t create_tcb(uint32_t pc);
+int32_t create_task(uint32_t pc);
 /* Find next available tcb*/
-uint8_t sched_select_next_tcb(void);
+uint8_t sched_select_next_task(void);
 /* Schedule process */
 void sched(void);
 /* Yield to sched*/

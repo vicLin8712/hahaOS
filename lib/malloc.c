@@ -34,7 +34,7 @@ void heap_init(uintptr_t *heap_top, size_t len)
 
     /* Assign start and end memory control block as initial */
     start = (memblock_t *) heap_top;
-    end = (memblock_t *)((size_t)start + len - sizeof(memblock_t));
+    end = (memblock_t *) ((size_t) start + len - sizeof(memblock_t));
 
     /* Connect each memblock */
     start->next = end;
@@ -58,8 +58,6 @@ void *malloc(size_t size)
     memblock_t *p = first_free;
     size = ALIGN4(size);
     while (p) {
-       
-
         if (!IS_USED(p) && GET_SIZE(p) >= size) {
             size_t remaining = GET_SIZE(p) - size;
 

@@ -12,7 +12,7 @@ kcb_t *kcb = &kernel_state;
 
 int32_t create_task(uint32_t entry)
 {
-    struct tcb*available = NULL;
+    struct tcb *available = NULL;
 
     /* Search available task memory in the array */
     for (int index = 0; index < PROCS_MAX; index++) {
@@ -42,16 +42,19 @@ int32_t create_task(uint32_t entry)
 
 uint8_t sched_select_next_task(void)
 {
+    /* Stop current task */
+    if (kcb->cur_tcb)
+        kcb->cur_tcb->state = TASK_STOPPED;
+
+    /* Reschedule new tasks*/
     for (int i = 0; i < PROCS_MAX; i++) {
         if (tcbs[i].state == TASK_READY) {
             printf("FIND TASKS\n");
-            for (int j = 0; j < 300000000; j++)
-                ;
             kcb->cur_tcb = &tcbs[i];
             return 1;
         }
     }
-    panic(ERR_NO_TASK);
+    return 0;
 }
 
 void sched(void)
