@@ -175,23 +175,58 @@ int hal_context_save(jmp_buf env)
         : "t0", "t1", "t2", "memory", "a0");
     return 0;
 }
+
+__attribute__((noreturn)) void hal_context_restore(jmp_buf env, int32_t val)
+{
+    if (unlikely(!env))
+        hal_panic(); /* Cannot proceed with invalid context */
+
+    if (val == 0)
+        val = 1; /* Must return a non-zero value after restore */
+
+    __asm__ __volatile__(
+        /* Restore mstatus FIRST to ensure correct processor state */
+        "lw  t0, 16*4(%0)\n"
+        "csrw mstatus, t0\n"
+        /* Restore all registers from the provided 'jmp_buf' */
+        "lw  s0,   0*4(%0)\n"
+        "lw  s1,   1*4(%0)\n"
+        "lw  s2,   2*4(%0)\n"
+        "lw  s3,   3*4(%0)\n"
+        "lw  s4,   4*4(%0)\n"
+        "lw  s5,   5*4(%0)\n"
+        "lw  s6,   6*4(%0)\n"
+        "lw  s7,   7*4(%0)\n"
+        "lw  s8,   8*4(%0)\n"
+        "lw  s9,   9*4(%0)\n"
+        "lw  s10, 10*4(%0)\n"
+        "lw  s11, 11*4(%0)\n"
+        "lw  sp,  12*4(%0)\n"
+        "lw  ra,  13*4(%0)\n"
+        /* Set the return value (in 'a0') */
+        "mv  a0,  %1\n"
+        /* "Return" to the restored 'ra', effectively jumping to new context */
+        "ret\n"
+        :
+        : "r"(env), "r"(val)
+        : "memory");
+
+    __builtin_unreachable(); /* Tell compiler this point is never reached */
+}
+
 /* Trap control */
 void do_trap()
 {
     /* Read time & reset new time */
     uint64_t current = ((uint64_t) MTIME_H << 32) | MTIME_L;
     uint64_t newtime =
-        current + 1000 * F_CPU / 1000; /* Timer interrupt per ms */
+        current + F_CPU/1000; /* Timer interrupt per ms */
 
     MTIMECMP_H = 0xFFFFFFFFu;
     MTIMECMP_L = (uint32_t) newtime;
-    MTIMECMP_H = (uint32_t) (newtime >> 32);
-
-
-    /* Find new task and put into kcb */
-    if (sched_select_next_task())
-        /* Jump to new tasks */
-        longjmp(kcb->cur_tcb->context, 1);
+    MTIMECMP_H = (uint32_t)(newtime >> 32);
+    printf("TRAPPED\n");
+    scheduler();
 }
 
 void hal_panic(void)

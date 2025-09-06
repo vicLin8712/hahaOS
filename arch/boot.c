@@ -14,9 +14,9 @@ __attribute__((section(".text.boot"))) __attribute__((naked)) void _entry(void)
         "la t0, _isr\n"    /* Load _isr address*/
         "csrw mtvec, t0\n" /* Store _isr address to stvec */
 
-        "li t0, 0x00000080\n"
+        "li t0, 0\n"
         "csrw mie, t0\n"
-        "csrs mstatus, 8\n"
+        "csrs mstatus, t0\n"
         "call main\n"  // Jump to the kernel main function
         :
         : [stack_top] "r"(
