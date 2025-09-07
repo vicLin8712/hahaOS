@@ -1,0 +1,1 @@
+#define MIE_MEIE (1U << 11) /* Machine external interrupt enable */

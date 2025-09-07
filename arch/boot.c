@@ -1,26 +1,47 @@
-#include "type.h"
+#include "csr.h"
 
 
-extern char __stack_top[];
+extern char __stack_top, __bss, __bss_end;
 
 void main(void);
 
-#define MIE (1u << 11)
 __attribute__((section(".text.boot"))) __attribute__((naked)) void _entry(void)
 {
     __asm__ __volatile__(
-        "mv sp, %0\n"  // Set the stack pointer
+        /* Initialize stack pointer */
+        "la sp, __stack_top\n"
 
+        /* Clean BSS */
+        "la a0, __bss\n"
+        "la a1, __bss_end\n"
+        "bgeu a0, a1, .Lbss_cleaned\n"
+        ".Lbss_clean_loop:\n"
+        "sw zero, 0(a0)\n"
+        "addi a0, a0,4\n"
+        "bltu a0, a1, .Lbss_clean_loop\n"
+        ".Lbss_cleaned\n"
+
+        /* Set machine trap vector to _isr */
         "la t0, _isr\n"    /* Load _isr address*/
-        "csrw mtvec, t0\n" /* Store _isr address to stvec */
+        "csrw mtvec, t0\n" /* Store _isr address to mtvec */
 
-        "li t0, 0\n"
+        /* Set machin external interrupt, but global interrupt, mstatus, still
+           closed until scheduler ready */
+        "li t0, %0\n"
         "csrw mie, t0\n"
-        "csrs mstatus, t0\n"
-        "call main\n"  // Jump to the kernel main function
+
+        /* Jump to the kernel main function */
+        "call main\n"
+
+        /* main() shouldn't return*/
+        "call   hal_panic\n"
+        "wfi\n"
+
         :
-        : [stack_top] "r"(
-            __stack_top)  // Pass the stack top address as %[stack_top]
+        : "i"(MIE_MEIE)
+        : "memory"
+
+
     );
 }
 
