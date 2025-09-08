@@ -13,11 +13,11 @@ kcb_t *kcb = &kernel_state;
 int32_t create_task(uint32_t entry)
 {
     struct tcb *available = NULL;
-
     /* Search available task memory in the array */
     for (int index = 0; index < PROCS_MAX; index++) {
         if (tcbs[index].state == NO_TASK) {
             available = &tcbs[index];
+            available->task_index = index;
             break;
         }
     }
@@ -27,7 +27,7 @@ int32_t create_task(uint32_t entry)
     available->state = TASK_READY;
 
     /* Initialize jmp buffer of new task*/
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 15; i++) {
         available->context[i] = 0;
     }
 
@@ -38,28 +38,55 @@ int32_t create_task(uint32_t entry)
 
     available->context[12] = (uint32_t) sp;
     available->context[13] = (uint32_t) entry;
+    available->context[14] = (uint32_t) 1u<< 3| 3u<<11;
+
+    if (!kcb->cur_tcb)
+    {
+        kcb->cur_tcb = available;
+        kcb->cur_tcb->state = TASK_RUNNING;
+    }
+    
 }
 
 uint8_t sched_select_next_task(void)
 {
-    /* Stop current task */
-    if (kcb->cur_tcb)
-        kcb->cur_tcb->state = TASK_STOPPED;
+    int task_index = (kcb->cur_tcb) ? (kcb->cur_tcb->task_index++)%7 : 0;
 
     /* Reschedule new tasks*/
+    tcb_t *next = NULL;
+    int i = task_index;
     for (int i = 0; i < PROCS_MAX; i++) {
-        if (tcbs[i].state == TASK_READY) {
-            printf("FIND TASKS\n");
-            kcb->cur_tcb = &tcbs[i];
-            return 1;
+        task_index %= 7;
+        if (tcbs[task_index].state == TASK_READY) {
+            next = &tcbs[task_index];
+            next->state = TASK_RUNNING;
+            break;
         }
+        task_index++;
     }
-    return 0;
+    
+    /* Stop current task */
+    tcb_t *curr = kcb->cur_tcb;
+    if (curr && curr->state == TASK_RUNNING)
+        curr->state = TASK_READY;
+
+    kcb->cur_tcb = next;
+
+
+    if (!next) {
+        panic(ERR_NO_TASK);
+        return 0;
+    }
+    return next->pid;
 }
 
-void sched(void)
+void scheduler(void)
 {
-    longjmp(kcb->cur_tcb->context, 1);
+    if (hal_context_save((tcb_t *)(kcb->cur_tcb)->context) != 0)
+        return;
+
+    sched_select_next_task();
+    hal_context_restore(((tcb_t *)(kcb->cur_tcb)->context), 1);
 }
 
 void yield(void)
@@ -67,7 +94,7 @@ void yield(void)
     kcb->cur_tcb->state = TASK_STOPPED;
     setjmp(kcb->cur_tcb->context);
     sched_select_next_task();
-    sched();
+    scheduler();
 }
 
 /* Kernel panic */

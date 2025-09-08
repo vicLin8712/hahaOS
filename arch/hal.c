@@ -161,15 +161,17 @@ int hal_context_save(jmp_buf env)
         "sw sp, 12*4(%0)\n"
         "sw ra, 13*4(%0)\n"
 
-        /* Recover MIE by MPIE */
-        "csrr t0, mstatus\n"
-        "andi t1, t0, ~8\n" /* clear MIE bit */
-        "srli t2, t0, 4\n"  /* move MPIE down */
-        "andi t2, t2, 8\n"  /* isolate */
-        "or   t1, t1, t2\n" /* combine */
+        /* Save mstatus with interrupt state reconstruction. During timer
+         * interrupts, mstatus.MIE is cleared, so we reconstruct the pre-trap
+         * state from MPIE for consistent interrupt context preservation.
+         */
+        "csrr t0, mstatus\n" /* Read current mstatus (MIE=0 in trap) */
+        "andi t1, t0, ~8\n"  /* Clear MIE bit first */
+        "srli t2, t0, 4\n"   /* Get MPIE bit to position 3 */
+        "andi t2, t2, 8\n"   /* Isolate bit 3 */
+        "or   t1, t1, t2\n"  /* Combine cleared MIE with reconstructed bit */
         "sw   t1, 14*4(%0)\n"
 
-        "li a0, 0\n"
         :
         : "r"(env)
         : "t0", "t1", "t2", "memory", "a0");
@@ -185,9 +187,6 @@ __attribute__((noreturn)) void hal_context_restore(jmp_buf env, int32_t val)
         val = 1; /* Must return a non-zero value after restore */
 
     __asm__ __volatile__(
-        /* Restore mstatus FIRST to ensure correct processor state */
-        "lw  t0, 16*4(%0)\n"
-        "csrw mstatus, t0\n"
         /* Restore all registers from the provided 'jmp_buf' */
         "lw  s0,   0*4(%0)\n"
         "lw  s1,   1*4(%0)\n"
@@ -203,8 +202,11 @@ __attribute__((noreturn)) void hal_context_restore(jmp_buf env, int32_t val)
         "lw  s11, 11*4(%0)\n"
         "lw  sp,  12*4(%0)\n"
         "lw  ra,  13*4(%0)\n"
+        "lw  t0,  14*4(%0)\n"
+        "csrw  mstatus,  t0\n"
         /* Set the return value (in 'a0') */
         "mv  a0,  %1\n"
+           
         /* "Return" to the restored 'ra', effectively jumping to new context */
         "ret\n"
         :
@@ -214,18 +216,56 @@ __attribute__((noreturn)) void hal_context_restore(jmp_buf env, int32_t val)
     __builtin_unreachable(); /* Tell compiler this point is never reached */
 }
 
+static void __attribute__((naked, used)) __dispatch_init(void)
+{
+    __asm__ __volatile__(
+        "lw  s0,   0*4(a0)\n"
+        "lw  s1,   1*4(a0)\n"
+        "lw  s2,   2*4(a0)\n"
+        "lw  s3,   3*4(a0)\n"
+        "lw  s4,   4*4(a0)\n"
+        "lw  s5,   5*4(a0)\n"
+        "lw  s6,   6*4(a0)\n"
+        "lw  s7,   7*4(a0)\n"
+        "lw  s8,   8*4(a0)\n"
+        "lw  s9,   9*4(a0)\n"
+        "lw  s10, 10*4(a0)\n"
+        "lw  s11, 11*4(a0)\n"
+        "lw  sp,  12*4(a0)\n"
+        "lw  ra,  13*4(a0)\n"
+        "ret\n"); /* Jump to the task's entry point */
+}
+__attribute__((noreturn))  void hal_scheduler_init(jmp_buf env) {
+    uint64_t current = ((uint64_t) MTIME_H << 32) | MTIME_L;
+    uint64_t newtime = current + F_CPU / 1000; /* Timer interrupt per ms */
+
+    MTIMECMP_H = 0xFFFFFFFFu;
+    MTIMECMP_L = (uint32_t) newtime;
+    MTIMECMP_H = (uint32_t)(newtime >> 32);
+    
+    ei();
+    write_csr(mie, read_csr(mie) | 1U << 7);
+    printf("GGG");
+
+    __asm__ __volatile__(
+        "mv  a0, %0\n"           /* Move @env (the task's context) into 'a0' */
+        "call __dispatch_init\n" /* Call the low-level restore routine */
+        :
+        : "r"(env)
+        : "a0", "memory");
+    __builtin_unreachable();
+}
+
 /* Trap control */
 void do_trap()
 {
     /* Read time & reset new time */
     uint64_t current = ((uint64_t) MTIME_H << 32) | MTIME_L;
-    uint64_t newtime =
-        current + F_CPU/1000; /* Timer interrupt per ms */
+    uint64_t newtime = current + F_CPU/10000 ; /* Timer interrupt per ms */
 
     MTIMECMP_H = 0xFFFFFFFFu;
     MTIMECMP_L = (uint32_t) newtime;
-    MTIMECMP_H = (uint32_t)(newtime >> 32);
-    printf("TRAPPED\n");
+    MTIMECMP_H = (uint32_t) (newtime >> 32);
     scheduler();
 }
 

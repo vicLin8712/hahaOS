@@ -19,7 +19,12 @@ __attribute__((section(".text.boot"))) __attribute__((naked)) void _entry(void)
         "sw zero, 0(a0)\n"
         "addi a0, a0,4\n"
         "bltu a0, a1, .Lbss_clean_loop\n"
-        ".Lbss_cleaned\n"
+        ".Lbss_cleaned:\n"
+        
+        "csrw   mie, zero\n"     /* Machine Interrupt Enable */
+        "csrw   mip, zero\n"     /* Machine Interrupt Pending */
+        "csrw   mideleg, zero\n" /* No interrupt delegation to S-mode */
+        "csrw   medeleg, zero\n" /* No exception delegation to S-mode */
 
         /* Set machine trap vector to _isr */
         "la t0, _isr\n"    /* Load _isr address*/
