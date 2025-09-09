@@ -4,7 +4,6 @@ hahaOS is a lightweight **RISC-V operating system** developed for educational an
 Its goal is to explore **core OS design** (boot, scheduler, interrupts, memory management) while providing an experimental platform. 
 Also, this project is mainly refer to [Operating System in 1000 Lines](https://operating-system-in-1000-lines.vercel.app/en/) and [linmo](https://github.com/sysprog21/linmo)
 
----
 
 ## Features
 
@@ -20,18 +19,6 @@ Also, this project is mainly refer to [Operating System in 1000 Lines](https://o
   - UART 16550  
   - CLINT timer interrupt  
 
----
-
-## Build & Run
-
-### Requirements
-- RISC-V GCC or Clang cross-compiler  
-- QEMU (`virt-riscv32`)  
-- Make  
-
-### Build
-```bash
-make
 
 ## Roadmap 
 - [ ] O(1) complexity scheduler with different priority.
