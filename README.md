@@ -2,7 +2,9 @@
 
 hahaOS is a lightweight **RISC-V operating system** developed for educational and research purposes.  
 Its goal is to explore **core OS design** (boot, scheduler, interrupts, memory management) while providing an experimental platform. 
-Also, this project is mainly refer to [Operating System in 1000 Lines](https://operating-system-in-1000-lines.vercel.app/en/) and [linmo](https://github.com/sysprog21/linmo)
+Also, this project is mainly refer to [Operating System in 1000 Lines](https://operating-system-in-1000-lines.vercel.app/en/) and [linmo](https://github.com/sysprog21/linmo).
+
+The development recorded at [作業系統開發紀錄](https://hackmd.io/@vicLin/HJa4KH5Uxl)
 
 
 ## Features
