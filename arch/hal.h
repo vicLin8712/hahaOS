@@ -28,7 +28,7 @@ extern uint32_t __heap_size;
 static inline void hal_interrupt_set(int32_t enable)
 {
     int32_t mstatus_reg = read_csr(mstatus);
-    mstatus_reg &= ~8;               /* Clear MIE */
+    mstatus_reg &= ~8;                /* Clear MIE */
     mstatus_reg |= (enable & 1) << 3; /* Left shift enable bit*/
     write_csr(mstatus, mstatus_reg);
 }

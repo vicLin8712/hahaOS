@@ -20,7 +20,7 @@ __attribute__((section(".text.boot"))) __attribute__((naked)) void _entry(void)
         "addi a0, a0,4\n"
         "bltu a0, a1, .Lbss_clean_loop\n"
         ".Lbss_cleaned:\n"
-        
+
         "csrw   mie, zero\n"     /* Machine Interrupt Enable */
         "csrw   mip, zero\n"     /* Machine Interrupt Pending */
         "csrw   mideleg, zero\n" /* No interrupt delegation to S-mode */

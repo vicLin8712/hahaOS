@@ -1,6 +1,6 @@
 #pragma once
 #include "hal.h"
-#include "list.h"
+#include "lib/list.h"
 #include "type.h"
 
 /* Stack size and begining */
@@ -27,6 +27,7 @@ typedef struct tcb {
     uint8_t prio;
     list_node_t cur_node; /* Task node at queue*/
     uint32_t stack[STACK_SIZE];
+    uintptr_t entry;
 
     /* Time relative */
     uint64_t total_exe_ticks;
@@ -41,13 +42,8 @@ typedef struct tcb {
 
 } tcb_t;
 
-typedef struct sched {
-    /* All tasks lists */
-    list_t *task_list;          /* List for all tasks, including DELETED */
-    list_t *ready[PRIOR_LEVEL]; /* Ready for picked up tasks */
-    list_t *wait;               /* Wait event tasks */
-    list_t *suspend;            /* Suspended by itself tasks */
-
+/* Sched_t is the data structure that major recording properties of scheduler */
+typedef struct {
     /* Tasks list properties */
     uint8_t bitmap;                    /* Bit map for O(1) scheduler */
     uint32_t tasks_count[PRIOR_LEVEL]; /* Number of tasks in each queue */
@@ -59,7 +55,9 @@ typedef struct sched {
 
 } sched_t;
 
+/* kcb also maintain task lists */
 typedef struct {
+    /* Basic properties about kernel state */
     int hart_id;             /* CPU hart ID */
     struct tcb *cur_tcb;     /* Task control block of current task */
     struct sched *sched;     /* Scheduler control block*/
@@ -68,13 +66,20 @@ typedef struct {
     bool preemptive;         /* Preemptive option */
     volatile uint32_t ticks; /* Global system tick, incremented by timer */
 
+    /* All tasks lists */
+    list_t *task_list;          /* List for all tasks, including DELETED */
+    list_t *ready[PRIOR_LEVEL]; /* Ready for picked up tasks */
+    list_t *wait;               /* Wait event tasks */
+    list_t *suspend;            /* Suspended by itself tasks */
+
 } kcb_t;
 
 
 extern kcb_t *kcb;
-
+extern sched_t *sched;
+uint32_t init_task_q(void);
 /* Scheduler */
-int32_t create_task(uint32_t pc);
+uint32_t create_task(uint32_t, uint8_t);
 /* Find next available tcb*/
 uint8_t sched_select_next_task(void);
 /* Schedule process */

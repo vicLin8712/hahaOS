@@ -203,10 +203,11 @@ __attribute__((noreturn)) void hal_context_restore(jmp_buf env, int32_t val)
         "lw  sp,  12*4(%0)\n"
         "lw  ra,  13*4(%0)\n"
         "lw  t0,  14*4(%0)\n"
-        "csrw  mstatus,  t0\n"
+
         /* Set the return value (in 'a0') */
         "mv  a0,  %1\n"
-           
+
+        "csrw  mstatus,  t0\n"
         /* "Return" to the restored 'ra', effectively jumping to new context */
         "ret\n"
         :
@@ -235,17 +236,17 @@ static void __attribute__((naked, used)) __dispatch_init(void)
         "lw  ra,  13*4(a0)\n"
         "ret\n"); /* Jump to the task's entry point */
 }
-__attribute__((noreturn))  void hal_scheduler_init(jmp_buf env) {
+__attribute__((noreturn)) void hal_scheduler_init(jmp_buf env)
+{
     uint64_t current = ((uint64_t) MTIME_H << 32) | MTIME_L;
     uint64_t newtime = current + F_CPU / 1000; /* Timer interrupt per ms */
 
     MTIMECMP_H = 0xFFFFFFFFu;
     MTIMECMP_L = (uint32_t) newtime;
-    MTIMECMP_H = (uint32_t)(newtime >> 32);
-    
+    MTIMECMP_H = (uint32_t) (newtime >> 32);
+
     ei();
     write_csr(mie, read_csr(mie) | 1U << 7);
-    printf("GGG");
 
     __asm__ __volatile__(
         "mv  a0, %0\n"           /* Move @env (the task's context) into 'a0' */
@@ -261,7 +262,7 @@ void do_trap()
 {
     /* Read time & reset new time */
     uint64_t current = ((uint64_t) MTIME_H << 32) | MTIME_L;
-    uint64_t newtime = current + F_CPU/10000 ; /* Timer interrupt per ms */
+    uint64_t newtime = current + F_CPU / 1000; /* Timer interrupt per ms */
 
     MTIMECMP_H = 0xFFFFFFFFu;
     MTIMECMP_L = (uint32_t) newtime;

@@ -1,97 +1,118 @@
 #include "sys/task.h"
+#include "include/lib/list.h"
 #include "include/libc.h"
 #include "sys/error.h"
 #include "type.h"
 
-#define STACK_SIZE 8192
-struct tcb tcbs[PROCS_MAX];
-kcb_t kernel_state = {.tcbs = (uint32_t *) &tcbs,
-                      .cur_tcb = NULL,
-                      .pid_assign = 0};
+
+/* Initialization */
+sched_t scheduler_state = {
+
+    .bitmap = 0,
+    .ctxsw_total = 0,
+    .total_exe_ticks = 0,
+    .idle = NULL,
+};
+sched_t *sched = &scheduler_state;
+
+kcb_t kernel_state = {
+    .hart_id = 0,
+    .cur_tcb = NULL,
+    .pid_assign = 0,
+    .preemptive = true,
+    .ticks = 0,
+
+    .task_list = NULL,
+    .ready = NULL,
+    .wait = NULL,
+    .suspend = NULL,
+};
 kcb_t *kcb = &kernel_state;
 
-int32_t create_task(uint32_t entry)
+/* Initialize queue of tasks */
+uint32_t init_task_q(void)
 {
-    struct tcb *available = NULL;
-    /* Search available task memory in the array */
-    for (int index = 0; index < PROCS_MAX; index++) {
-        if (tcbs[index].state == NO_TASK) {
-            available = &tcbs[index];
-            available->task_index = index;
-            break;
-        }
-    }
+    kcb->task_list = list_init();
+    for (int i = 0; i < PRIOR_LEVEL; i++)
+        kcb->ready[i] = list_init();
+    kcb->suspend = list_init();
+    kcb->wait = list_init();
+}
 
-    available->entry = entry;
-    available->pid = kcb->pid_assign++;
-    available->state = TASK_READY;
 
-    /* Initialize jmp buffer of new task*/
+
+uint32_t create_task(uint32_t entry, uint8_t prio)
+{
+    list_node_t *new_task_node = malloc(sizeof(list_node_t));
+    tcb_t *new_task = malloc(sizeof(tcb_t));
+    new_task_node->data = new_task;
+
+    /* Basic properties */
+    new_task->id = kcb->pid_assign++;
+    new_task->state = TASK_READY;
+    new_task->prio = prio;
+    new_task->entry = entry;
+
+    /* Initialize jmp buffer of new task */
     for (int i = 0; i < 15; i++) {
-        available->context[i] = 0;
+        new_task->context[i] = 0;
     }
 
     uintptr_t sp =
-        (uintptr_t) (available->stack +
+        (uintptr_t) (new_task->stack +
                      STACK_SIZE);  // Take highest address of stack address
     sp &= ~(uintptr_t) 0xF;        // 16-byte align (RISC-V ABI)
 
-    available->context[12] = (uint32_t) sp;
-    available->context[13] = (uint32_t) entry;
-    available->context[14] = (uint32_t) 1u<< 3| 3u<<11;
+    new_task->context[12] = (uint32_t) sp;
+    new_task->context[13] = (uint32_t) entry;
+    new_task->context[14] = (uint32_t) 1u << 3 | 3u << 11;
 
-    if (!kcb->cur_tcb)
-    {
-        kcb->cur_tcb = available;
+
+    /* Hang up first task node into kcb */
+    if (!kcb->cur_tcb) {
+        kcb->cur_tcb = new_task;
         kcb->cur_tcb->state = TASK_RUNNING;
+        return true;
     }
-    
+    /* Push tcb to corresponding lists */
+    list_push(kcb->task_list, new_task);
+    list_push(kcb->ready[prio], new_task);
 }
 
 uint8_t sched_select_next_task(void)
 {
-    int task_index = (kcb->cur_tcb) ? (kcb->cur_tcb->task_index++)%7 : 0;
-
     /* Reschedule new tasks*/
-    tcb_t *next = NULL;
-    int i = task_index;
-    for (int i = 0; i < PROCS_MAX; i++) {
-        task_index %= 7;
-        if (tcbs[task_index].state == TASK_READY) {
-            next = &tcbs[task_index];
-            next->state = TASK_RUNNING;
-            break;
-        }
-        task_index++;
-    }
-    
+    tcb_t *next = (tcb_t *) list_pop(kcb->ready[1]);
+
     /* Stop current task */
     tcb_t *curr = kcb->cur_tcb;
+
     if (curr && curr->state == TASK_RUNNING)
         curr->state = TASK_READY;
 
     kcb->cur_tcb = next;
 
+    list_push(kcb->ready[1], curr);
 
     if (!next) {
         panic(ERR_NO_TASK);
         return 0;
     }
-    return next->pid;
+    return next->id;
 }
 
 void scheduler(void)
 {
-    if (hal_context_save((tcb_t *)(kcb->cur_tcb)->context) != 0)
+    if (hal_context_save((tcb_t *) (kcb->cur_tcb)->context) != 0) {
         return;
+    }
 
     sched_select_next_task();
-    hal_context_restore(((tcb_t *)(kcb->cur_tcb)->context), 1);
+    hal_context_restore(((tcb_t *) (kcb->cur_tcb)->context), 1);
 }
 
 void yield(void)
 {
-    kcb->cur_tcb->state = TASK_STOPPED;
     setjmp(kcb->cur_tcb->context);
     sched_select_next_task();
     scheduler();
